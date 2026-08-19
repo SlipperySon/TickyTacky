@@ -125,6 +125,14 @@ Related docs:
 
 Newest first.
 
+### 2026-08-19 (backend schema — cloud)
+- Landed initial Supabase schema as migrations (`supabase/migrations/`): lists, tasks, subtasks, tags, task_tags, schedules, schedule_blocks, schedule_exceptions
+- Conventions: `user_id`-scoped rows, RLS (owner-only) forced on all tables, `updated_at` trigger (LWW), `deleted_at` soft-delete
+- Embedded recurrence on `tasks` (series-only MVP); timetable blocks first-class
+- `seed.sql`: demo user (`demo@tickytacky.app` / `tickytacky`) + sample lists/tasks/timetable
+- Validated locally via `supabase db reset` + RLS isolation tests (Auth signup/login → PostgREST)
+- Still open (local/client): Sign in with Apple wiring, SyncEngine — Phase H client half
+
 ### 2026-08-19 (remote)
 - GitHub remote: `git@github.com:SlipperySon/TickyTacky.git`
 
