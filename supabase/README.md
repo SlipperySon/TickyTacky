@@ -2,6 +2,12 @@
 
 Canonical backend for Tickytacky.
 
+> **Build environment: Cloud-buildable (Linux Cloud Agent).** Schema migrations,
+> RLS, auth config, seed, and Edge Functions here can be built and tested against
+> the local Supabase stack — no Mac required. The SwiftUI client in
+> [`../apps/ios/`](../apps/ios/) is local-only (macOS + Xcode).
+> See [IMPLEMENTATION_MAP.md §Build environments](../IMPLEMENTATION_MAP.md#build-environments-cloud-vs-local).
+
 ## Local development
 
 A local Postgres + Auth + Realtime + Storage + Studio stack runs via the
