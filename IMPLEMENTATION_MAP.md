@@ -13,6 +13,38 @@ Use checkboxes to track progress. Prefer finishing an entire **phase** before st
 
 ---
 
+## Build environments (cloud vs local)
+
+Work here builds in one of two places. This split determines what a Linux
+**Cloud Agent** can implement and test versus what requires a **Mac + Xcode**.
+
+| Environment | What it builds | Runnable/testable | Notes |
+|-------------|----------------|-------------------|-------|
+| **Cloud** — Linux Cloud Agent | Supabase backend in `supabase/`: schema migrations, RLS policies, auth config, seed data, indexes, optional Edge Functions | Yes — against the local Supabase stack (`supabase start`, provisioned by `.cursor/`) | Apple frameworks cannot compile here |
+| **Local** — macOS + Xcode | The entire SwiftUI client in `apps/ios/`: UI, GRDB cache, domain logic, notifications, sync engine | Yes — iPhone/iPad/Mac simulators + devices | Not buildable on Linux/CI-without-macOS |
+
+### Phase → environment map
+
+| Phase | Work | Environment |
+|-------|------|-------------|
+| A | Xcode project, ThemeTokens/Notebook, GRDB cache, app shell | **Local** |
+| B | Tasks/lists CRUD, Today/Upcoming | **Local** |
+| C | Tags, search, sorting | **Local** |
+| D | Recurrence engine + editor UI | **Local** |
+| E | Timetable / schedule blocks + week view | **Local** |
+| F | Combined Today (tasks + occurrences) | **Local** |
+| G | Local notifications | **Local** (device) |
+| H | Supabase schema, RLS, auth config, seed | **Cloud** |
+| H | Sign in with Apple flow, SyncEngine, offline queue, realtime | **Local** |
+| I+ | Hardening, widgets/App Intents, platform polish | **Local** |
+
+**Phase H straddles both:** build the backend half (schema/RLS/auth/seed) in the
+cloud environment first to unblock and de-risk the client-side sync work done
+locally. Everything in `supabase/` is cloud-buildable; everything in `apps/ios/`
+is local-only.
+
+---
+
 ## Legend
 
 | Tag | Meaning |

@@ -1,0 +1,12 @@
+{
+  "name": "Tickytacky — Supabase backend",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh",
+  "start": "bash .cursor/start.sh",
+  "ports": [
+    { "name": "Supabase API (Kong)", "port": 54321 },
+    { "name": "Postgres", "port": 54322 },
+    { "name": "Supabase Studio", "port": 54323 },
+    { "name": "Mailpit (email testing)", "port": 54324 }
+  ]
+}
