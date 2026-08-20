@@ -10,6 +10,21 @@ Use checkboxes to track progress. Prefer finishing an entire **phase** before st
 
 **Canonical backend:** Supabase (not CloudKit). **Design:** Classic Notebook ([`DESIGN.md`](DESIGN.md)).
 
+---
+
+## Build environments (cloud vs local)
+
+| Environment | What it builds | Notes |
+|-------------|----------------|-------|
+| **Cloud** — Linux Cloud Agent | `supabase/`: schema, RLS, auth config, seed, Edge Functions | Apple frameworks cannot compile here |
+| **Local** — macOS + Xcode | Entire SwiftUI client in `apps/ios/` | Not buildable on Linux |
+
+| Phase | Environment |
+|-------|-------------|
+| A–G | **Local** |
+| H (schema/RLS/auth/seed) | **Cloud** |
+| H (Sign in with Apple UI, SyncEngine) | **Local** |
+| I+ | **Local** |
 
 ---
 
@@ -179,7 +194,7 @@ Fields:
 - [ ] `tags: [Tag]` relationship
 - [ ] `subtasks: [Subtask]` relationship
 - [ ] `recurrenceRule: RecurrenceRule?` (embedded or related)
-- [ ] `reminderOffsets: [TimeInterval]` or dedicated `Reminder` entities
+- [x] `reminderOffsets: [TimeInterval]` or dedicated `Reminder` entities
 - [ ] Soft-delete (`deleted_at`) — **yes** (locked)
 
 Behaviors to support:
@@ -244,7 +259,7 @@ Recurring weekly (MVP) time block.
 - [ ] `color`
 - [ ] Optional `list: TaskList?` link
 - [ ] Optional `tag: Tag?` link
-- [ ] `reminderMinutesBefore: Int?`
+- [x] `reminderMinutesBefore: Int?`
 - [ ] Parent `Schedule`
 
 #### `ScheduleException` (`P0`)
@@ -321,19 +336,19 @@ One-off skip/move for a generated occurrence.
 - [ ] P1: conflict detection (overlaps)
 
 ### 4.6 `TodayAssembler`
-- [ ] Merge overdue tasks, due-today tasks, undated pinned? (no pins in MVP unless added)
-- [ ] Merge today’s schedule occurrences
-- [ ] Stable sort: timetable by start time; tasks by priority then due time then sortOrder (`DECISION`)
-- [ ] Section model for UI
+- [x] Merge overdue tasks, due-today tasks, undated pinned? (no pins in MVP unless added)
+- [x] Merge today’s schedule occurrences
+- [x] Stable sort: timetable by start time; tasks by priority then due time then sortOrder (`DECISION`)
+- [x] Section model for UI
 
 ### 4.7 `ReminderScheduler` (`APPLE`, `RISK`)
-- [ ] Request notification permission UX
-- [ ] Schedule local notifications for task due reminders
-- [ ] Schedule notifications for upcoming timetable blocks
-- [ ] Reschedule on edit/delete/complete
-- [ ] Cap pending notifications (iOS limit ~64) — prioritize soonest (`RISK`)
-- [ ] Clear delivered notifications appropriately
-- [ ] Handle timezone / travel changes on foreground
+- [x] Request notification permission UX
+- [x] Schedule local notifications for task due reminders
+- [x] Schedule notifications for upcoming timetable blocks
+- [x] Reschedule on edit/delete/complete
+- [x] Cap pending notifications (iOS limit ~64) — prioritize soonest (`RISK`)
+- [x] Clear delivered notifications appropriately
+- [x] Handle timezone / travel changes on foreground
 
 ### 4.8 `SearchService`
 - [ ] Query tasks by title/notes
@@ -367,9 +382,9 @@ Tab / root
 - [ ] Settings screen shell
 
 #### Today
-- [ ] Sections: Overdue (if any), Schedule (today’s blocks), Tasks due today, Maybe “No due date” omitted
-- [ ] Tap task → Task Detail
-- [ ] Tap schedule block → Block Detail / occurrence actions
+- [x] Sections: Overdue (if any), Schedule (today’s blocks), Tasks due today, Maybe “No due date” omitted
+- [x] Tap task → Task Detail
+- [x] Tap schedule block → Block Detail / occurrence actions
 - [ ] Complete checkbox
 - [ ] Empty state copy
 - [ ] Pull to refresh not required for local DB; refresh on appear OK
@@ -571,15 +586,15 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 **Goal:** One place to see “what’s happening / due today.”
 
 #### Work
-- [ ] F1. `TodayAssembler` merges tasks + occurrences
-- [ ] F2. Today UI sections redesigned
-- [ ] F3. Tap occurrence actions (open block, skip today)
-- [ ] F4. Upcoming optionally shows schedule blocks
-- [ ] F5. Sorting + accessibility labels
+- [x] F1. `TodayAssembler` merges tasks + occurrences
+- [x] F2. Today UI sections redesigned
+- [x] F3. Tap occurrence actions (open block, skip today)
+- [x] F4. Upcoming optionally shows schedule blocks
+- [x] F5. Sorting + accessibility labels
 
 #### Exit criteria
-- [ ] Today is trustworthy for a real personal weekday
-- [ ] Completing tasks doesn’t break schedule section
+- [x] Today is trustworthy for a real personal weekday
+- [x] Completing tasks doesn’t break schedule section
 
 ---
 
@@ -587,18 +602,18 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 **Goal:** Reminders fire for tasks and timetable blocks.
 
 #### Work
-- [ ] G1. Permission request UX + Settings status
-- [ ] G2. Map task reminders → `UNNotificationRequest`
-- [ ] G3. Map block reminders → notifications
-- [ ] G4. Reschedule pipeline on create/update/delete/complete
-- [ ] G5. Pending notification budget strategy
-- [ ] G6. Deep link notification → task/occurrence
-- [ ] G7. Foreground presentation rules
+- [x] G1. Permission request UX + Settings status
+- [x] G2. Map task reminders → `UNNotificationRequest`
+- [x] G3. Map block reminders → notifications
+- [x] G4. Reschedule pipeline on create/update/delete/complete
+- [x] G5. Pending notification budget strategy
+- [x] G6. Deep link notification → task/occurrence
+- [x] G7. Foreground presentation rules
 - [ ] G8. Device test (simulator limited; use physical iPhone)
 
 #### Exit criteria
 - [ ] Reminder fires on device for a task due in ~2 minutes
-- [ ] Editing/deleting removes obsolete notifications
+- [x] Editing/deleting removes obsolete notifications
 - [ ] Timetable block reminder fires
 
 ---
@@ -607,21 +622,21 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 **Goal:** Same data on two Apple devices via Supabase.
 
 #### Work
-- [ ] H1. Supabase schema: lists, tasks, tags, schedules, blocks, exceptions (soft-delete, updated_at)
-- [ ] H2. RLS policies per user_id
-- [ ] H3. Sign in with Apple → Supabase session
-- [ ] H4. SyncEngine: push/pull + realtime subscribe
-- [ ] H5. Conflict: last-write-wins per record
-- [ ] H6. Offline queue then sync on reconnect
-- [ ] H7. Sync status / error messaging in Settings
-- [ ] H8. Large dataset smoke
-- [ ] H9. Document “account required” limitation
+- [x] H1. Supabase schema: lists, tasks, tags, schedules, blocks, exceptions (soft-delete, updated_at) — cloud
+- [x] H2. RLS policies per user_id — cloud
+- [x] H3. Sign in with Apple → Supabase session — client (`AuthService` + Settings)
+- [x] H4. SyncEngine: push/pull (+ realtime subscribe **deferred**)
+- [x] H5. Conflict: last-write-wins per record
+- [x] H6. Offline queue then sync on reconnect (dirty `synced_at` + foreground/network sync)
+- [x] H7. Sync status / error messaging in Settings
+- [ ] H8. Large dataset smoke (optional / manual)
+- [x] H9. Document “account required” limitation (Settings footer + `apps/ios/README.md`)
 
 #### Exit criteria
 - [ ] Task created on iPhone appears on Mac/iPad
 - [ ] Schedule block syncs
 - [ ] Offline create then online sync works
-- [ ] No silent data loss in common LWW case (document behavior)
+- [x] No silent data loss in common LWW case (document behavior) — see `SyncMapping.md`
 
 ---
 
@@ -629,15 +644,15 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 **Goal:** Dogfoodable MVP.
 
 #### Work
-- [ ] I1. Bug bash checklist (below)
-- [ ] I2. Accessibility pass
-- [ ] I3. Dynamic Type / landscape iPhone sanity
-- [ ] I4. iPad usable layout (even if not polished)
-- [ ] I5. Mac window min sizes + basic keyboard delete/enter
-- [ ] I6. Privacy Nutrition labels prep
-- [ ] I7. TestFlight build
-- [ ] I8. Personal dogfood for 7 days
-- [ ] I9. Fix P0 bugs only; park P1 ideas
+- [x] I1. Bug bash checklist (below) — code/empty-state pass; see `apps/ios/MVP_HARDENING.md`
+- [x] I2. Accessibility pass — rows/checkboxes/headers/day strip
+- [x] I3. Dynamic Type / landscape iPhone sanity — ScaledMetric + semantic fonts
+- [x] I4. iPad usable layout (even if not polished) — split selection + single detail stack
+- [x] I5. Mac window min sizes + basic keyboard delete/enter
+- [ ] I6. Privacy Nutrition labels prep — **manual** (checklist in MVP_HARDENING.md)
+- [ ] I7. TestFlight build — **manual**
+- [ ] I8. Personal dogfood for 7 days — **manual**
+- [x] I9. Fix P0 bugs only; park P1 ideas — `apps/ios/BUGS.md`
 
 #### Exit criteria (MVP done)
 - [ ] Meets `SCOPE.md` MVP success criteria
@@ -754,8 +769,8 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 ### 8.1 Unit tests (required early)
 - [ ] RecurrenceEngine matrix
 - [ ] OccurrenceGenerator + exceptions
-- [ ] TodayAssembler sorting/sectioning
-- [ ] ReminderScheduler request building (identifiers stable/idempotent)
+- [x] TodayAssembler sorting/sectioning
+- [x] ReminderScheduler request building (identifiers stable/idempotent)
 
 ### 8.2 UI / integration
 - [ ] Smoke UI tests: create task, complete task (optional P0, stronger P1)
@@ -952,13 +967,16 @@ Track position on the sequence — not dates:
 | Current seq | Milestone | Status (`todo` / `active` / `done`) | Notes |
 |-------------|-----------|-------------------------------------|-------|
 | 0 | M0 Decisions | done | Tickytacky + Supabase + defaults |
-| 1 | M1 Foundation | active | Next: Xcode + schema |
-| 2 | M2 Tasks CRUD | todo | |
-| 4b | M5 Timetable | todo | |
-| 7 | M9 MVP SHIP | todo | |
+| 1 | M1 Foundation | done | Local: apps/ios XcodeGen + GRDB + shell |
+| 2 | M2 Tasks CRUD | done | Local Phase B |
+| 3 | M3 Tags/Search | done | Local Phase C |
+| 4 | M4+M5 Recurrence∥Timetable | done | Local D + E |
+| 5 | M6 Combined Today | done | Local Phase F |
+| 6 | M7+M8 Reminders∥Sync | active | G done locally; H client done (realtime deferred); remote needs `…00005` + Secrets dogfood |
+| 7 | M9 MVP SHIP | active | Phase I code (I1–I5, I9) done; I6–I8 manual |
 | 10 | M14 Daily driver | todo | |
 
-**Now working on:** `seq 1` / phase `A`
+**Now working on:** `seq 7` / phase `I` code hardening done; manual I6–I8 + two-device sync + G8 device fire + apply `20260819000005_lww_updated_at.sql` on remote
 
 ---
 

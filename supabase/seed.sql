@@ -54,11 +54,11 @@ begin
   insert into public.lists (user_id, name, is_inbox, sort_order)
     values (uid, 'Inbox', true, 0) returning id into inbox_id;
   insert into public.lists (user_id, name, color, sort_order)
-    values (uid, 'Coursework', 'Sky', 1) returning id into course_id;
+    values (uid, 'Coursework', 'sky', 1) returning id into course_id;
 
   -- Tag
   insert into public.tags (user_id, name, color)
-    values (uid, 'school', 'Sage') returning id into tag_school;
+    values (uid, 'school', 'sage') returning id into tag_school;
 
   -- Tasks
   insert into public.tasks (user_id, list_id, title, priority, due_date)

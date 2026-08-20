@@ -15,6 +15,13 @@ Personal planner — Apple-first, Supabase-backed, Classic Notebook design.
 - **API:** Supabase (Postgres + Auth + Realtime)
 - **Local cache:** GRDB / SQLite
 
+## Build environments
+
+| Environment | Builds |
+|-------------|--------|
+| **Cloud** (Linux) | `supabase/` backend |
+| **Local** (macOS + Xcode) | `apps/ios/` SwiftUI client |
+
 ## Status
 
-Phase A foundation — see MEM.md.
+Local: Phase A+B done; Phase C next. Cloud: Phase H schema. See MEM.md.

@@ -63,12 +63,14 @@ Related docs:
 | Week start | User setting (system-friendly default) |
 
 ### Sequence position
-- **Now working on:** seq 0–1 — decisions locked; foundation next
-- Next: Xcode multiplatform app + Supabase project/schema skeleton
+- **Now working on:** Manual MVP gate (Secrets, two-device sync, G8 device, TestFlight/dogfood)
+- **Done locally:** A–I code + ship-readiness sync/data fixes (UUID case, inbox reconcile, LWW dirty-local, account wipe, v8 id normalize)
+- **Cloud:** Apply `…00005` on remote before trusting LWW
+- Verdict: **ready for personal dogfood / internal TestFlight** after Secrets + signing; **not** App Store public until two-device + G8 pass
 
 ### Open decisions (non-blocking)
-- [ ] Exact Mac bundle / Catalyst vs native multiplatform target setup in Xcode
-- [ ] GRDB vs raw SQLite wrapper library choice when coding cache
+- [x] Mac vs iOS: native multiplatform target via XcodeGen (`supportedDestinations: [iOS, macOS]`)
+- [x] Local cache library: **GRDB**
 - [ ] Push: APNs via Supabase Edge / third-party later
 
 ### Explicit non-goals (for now)
@@ -83,9 +85,9 @@ Related docs:
 
 ## Active focus
 
-1. Scaffold Tickytacky iOS/macOS app + Supabase schema
-2. ThemeTokens (Notebook only) + app shell
-3. Phase B — local tasks CRUD against cache, then wire Supabase
+1. Wire Secrets + Sign in with Apple; apply remote `…00005`
+2. Two-device sync smoke + G8 physical reminder fire
+3. TestFlight + ~7-day dogfood (`apps/ios/MVP_HARDENING.md`)
 
 ## Pre-start checklist
 
@@ -124,6 +126,34 @@ Related docs:
 ## Log
 
 Newest first.
+
+### 2026-08-20 (cloud storage compact)
+- Migration `20260819000006_storage_compact.sql`: drop unused cols, nullable recurrence, smallints, text caps, purge_soft_deleted()
+- Client SyncMapper omits empty strings / unused fields; SyncMapping.md + supabase README updated
+
+### 2026-08-19 (local Phase I code)
+- I1–I5, I9: a11y + Dynamic Type, iPad split selection, Mac min window + delete key, P0 empty states
+- Docs: `apps/ios/MVP_HARDENING.md` (manual TestFlight/Privacy/G8/two-device + remote `…00005`), `apps/ios/BUGS.md` for P1
+- Skipped: realtime, TestFlight upload, Privacy filing, schema changes
+
+### 2026-08-19 (local Phase H client)
+- Sign in with Apple → Supabase (`AuthService` + Settings); offline CRUD without account
+- `SyncEngine` pull/push for lists/tasks/subtasks/tags/task_tags/schedules/blocks/exceptions; LWW via `updated_at`; dirty via `synced_at` (`v7_sync`)
+- Mapping notes in `apps/ios/Tickytacky/Data/Sync/SyncMapping.md` (reminders local-only; weekday/due/priority/recurrence maps)
+- Client-needed cloud fix: `supabase/migrations/20260819000005_lww_updated_at.sql` (preserve client `updated_at`)
+- Gaps: realtime subscribe deferred; H8 large-dataset smoke optional/manual
+
+### 2026-08-19 (local Phase G)
+- Local notifications: `ReminderRequestBuilder` + `ReminderScheduler`, Settings status, task/block reminders, ~64 budget, deep links (`tickytacky://`), foreground banners
+- Migration `v6_reminders` (`reminder_offsets_json` on tasks); blocks keep `reminder_minutes_before`
+- G8 device fire still manual (Simulator limited)
+
+### 2026-08-19 (local Phase A+B)
+- Branch `local/phase-a-foundation`: XcodeGen multiplatform app in `apps/ios/`
+- Phase A: ThemeTokens/Notebook, GRDB cache, Inbox seed, tab/split shell, Supabase config stub
+- Phase B: tasks/subtasks/lists CRUD, Today (overdue+due), Upcoming 7d, Browse, quick add, task detail
+- Verified: iPhone 17 sim + Mac builds; Inbox row in SQLite
+- Cloud parallel: `cursor/setup-supabase-dev-env-9475` owns `supabase/`
 
 ### 2026-08-19 (remote)
 - GitHub remote: `git@github.com:SlipperySon/TickyTacky.git`

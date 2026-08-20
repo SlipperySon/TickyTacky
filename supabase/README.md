@@ -42,13 +42,31 @@ Conventions applied to every synced table:
 - `user_id → auth.users(id)` ownership, enforced by **RLS** (an authenticated
   user only sees/writes their own rows; `service_role` bypasses; `anon` has no access).
 - `updated_at` (auto-maintained by trigger) for last-write-wins sync.
+  Migration `20260819000005_lww_updated_at.sql` preserves client-supplied
+  `updated_at` when it changes (required for SyncEngine LWW).
 - `deleted_at` for soft-delete.
+- **Compact storage** (`20260819000006_storage_compact.sql`): dropped unused
+  columns (`lists.icon`, `recurrence_end` / `by_weekdays`, `schedule_blocks.tag_id`),
+  nullable recurrence fields (no default interval on every task), `smallint`
+  sort/reminder fields, text length caps, empty-string → NULL, tighter indexes,
+  and `purge_soft_deleted(interval)` to hard-delete old tombstones.
 
 Apply migrations + seed to a fresh local DB:
 
 ```bash
 supabase db reset
 ```
+
+### Storage / purge
+
+Soft-deleted rows still consume space until purged:
+
+```sql
+select * from public.purge_soft_deleted(interval '30 days');
+```
+
+Grant is `service_role` only. Schedule monthly via Supabase cron or run after
+dogfood. Occurrences are never stored (computed client-side) — only exceptions.
 
 `seed.sql` creates a demo user and sample data for local development:
 
