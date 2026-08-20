@@ -1,0 +1,79 @@
+name: Tickytacky
+options:
+  bundleIdPrefix: app.tickytacky
+  deploymentTarget:
+    iOS: "18.0"
+    macOS: "15.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "0.1.0"
+    DEVELOPMENT_TEAM: ""
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 7.4.0
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: 2.5.0
+targets:
+  Tickytacky:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    sources:
+      - path: Tickytacky
+        excludes:
+          - "**/*.md"
+    resources:
+      - path: Tickytacky/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.tickytacky.ios
+        INFOPLIST_FILE: Tickytacky/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Tickytacky/Resources/Tickytacky.entitlements
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Tickytacky
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_TESTABILITY: YES
+        SUPABASE_URL: YOUR_SUPABASE_URL
+        SUPABASE_ANON_KEY: YOUR_SUPABASE_ANON_KEY
+        INFOPLIST_KEY_SUPABASE_URL: "$(SUPABASE_URL)"
+        INFOPLIST_KEY_SUPABASE_ANON_KEY: "$(SUPABASE_ANON_KEY)"
+    dependencies:
+      - package: GRDB
+        product: GRDB
+      - package: Supabase
+        product: Supabase
+  TickytackyTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS]
+    sources:
+      - path: TickytackyTests
+    dependencies:
+      - target: Tickytacky
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.tickytacky.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+schemes:
+  Tickytacky:
+    build:
+      targets:
+        Tickytacky: all
+        TickytackyTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - TickytackyTests

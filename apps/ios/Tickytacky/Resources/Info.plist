@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SUPABASE_URL</key>
+	<string>YOUR_SUPABASE_URL</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>YOUR_SUPABASE_ANON_KEY</string>
+	<key>CFBundleDisplayName</key>
+	<string>Tickytacky</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.tickytacky.ios</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tickytacky</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
