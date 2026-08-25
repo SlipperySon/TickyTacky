@@ -53,7 +53,7 @@ Use checkboxes to track progress. Prefer finishing an entire **phase** before st
 | D7 | Auth | Sign in with Apple via Supabase Auth | Locked |
 | D8 | Min OS | iOS 18 / iPadOS 18 / macOS 15 | Locked |
 | D9 | Product name / bundle | **Tickytacky** / `app.tickytacky.ios` | Locked |
-| D10 | Habit vs Pomodoro (P1) | **Pomodoro / Focus first**; habits deferred | Locked |
+| D10 | Habit vs Pomodoro (P1) | **Pomodoro in M**; **Habits in J** after dogfood; Eisenhower in N | Locked (updated) |
 | D11 | Design theme | Classic Notebook; theme picker later | Locked |
 | D12 | Soft-delete | Yes | Locked |
 | D13 | Conflicts | Last-write-wins per record | Locked |
@@ -468,12 +468,12 @@ iPad/Mac sidebar: Today, Calendar, Search, Focus, Settings.
 - [ ] Filters sheet
 - [ ] Multiple timetables manager
 - [ ] Drag-resize blocks
-- [ ] Focus / Pomodoro timer flows (Phase M; habits deferred)
+- [ ] Focus / Pomodoro timer flows (Phase M)
+- [ ] Habits (Phase J)
 - [ ] Widget configuration
 - [ ] Keyboard shortcut cheatsheet (Mac)
 
 ### 5.4 Screens — P2
-- [ ] Kanban board
 - [ ] Eisenhower matrix
 - [ ] Attachments viewer
 - [ ] Sharing UI
@@ -684,14 +684,14 @@ Ordered after Phase M + full dogfood. Do as a batch (order within batch flexible
 - [ ] J3. Week/day calendar integrating tasks + timetable
   - **DECISION (open):** Prefer **merging calendar into the existing Upcoming tab** (e.g. list + week/month toggle, or calendar header above the next-N-days list) instead of a fifth top-level tab — avoid IA bloat; validate in dogfood before committing to a separate Calendar tab
 - [ ] J4. Optional NL quick add
-- [ ] J5. Eisenhower matrix
+- [ ] J5. Habits (streaks / daily check-ins — chosen over Eisenhower for this batch)
 - [ ] J6. Richer recurrence (custom weekdays, end conditions) — if capacity
 - [ ] J7. Filters (list/tag/priority/scheduled) — if capacity
 - [ ] J8. Multiple timetables + active switching — later polish
 - [ ] J9. Conflict highlighting / drag on iPad/Mac — later polish
 
 #### Exit criteria
-- [ ] Calendar + theme + NL + matrix feel like a daily-driver upgrade, not toys
+- [ ] Calendar + theme + NL + habits feel like a daily-driver upgrade, not toys
 - [ ] Calendar IA decided: Upcoming merge **or** separate tab — documented after dogfood
 
 ---
@@ -723,7 +723,7 @@ Do **not** start until the J batch has been dogfooded. Revisit whether widgets a
 ---
 
 ### Phase M — Focus / Pomodoro (**next after MVP code**)
-**Chosen:** Focus / Pomodoro (D10 locked). Habits deferred to N.
+**Chosen:** Focus / Pomodoro (D10 locked). Habits moved into Phase J (after dogfood); Eisenhower deferred to N.
 
 - [x] M-F1. Focus session model
 - [x] M-F2. Timer UI (Notebook vibe)
@@ -742,8 +742,7 @@ Do **not** start until the J batch has been dogfooded. Revisit whether widgets a
 ---
 
 ### Phase N — P2 expansion (only after daily driver / J batch)
-- [ ] Habits (if still wanted)
-- [ ] Kanban
+- [ ] Eisenhower matrix
 - [ ] Attachments
 - [ ] Collaboration architecture spike (Supabase already supports; design sharing later)
 - [ ] EventKit sync spike (`RISK` — often more pain than value)
@@ -841,10 +840,10 @@ A Foundation (Tickytacky + Notebook + GRDB + Supabase stub)
                      └── I MVP Hardening  → MVP SHIP (code)
                           └── M Pomodoro / Focus
                                └── Full dogfood gate
-                                    └── J Theme + Calendar + NL + Eisenhower
+                                    └── J Theme + Calendar + NL + Habits
                                          ├── K Widgets (consider)
                                          ├── L Platform polish
-                                         └── N P2 (habits, Kanban, …)
+                                         └── N P2 (Eisenhower, …)
 ```
 
 **Critical path to MVP:** A → B → (D and E in parallel after B) → F → G → H → I
@@ -885,11 +884,11 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 | — | **MVP SHIP** | Gate: code ready; manual checks fold into post-M dogfood | P0 | I | — |
 | 8 | **M** | **Pomodoro / Focus** | P1 | MVP SHIP | — |
 | — | **Full dogfood** | Real-week use + remaining MVP manual checks | P1 | M | — |
-| 9 | **J** | Theme picker + calendar + NL quick-add + Eisenhower | P1 | Full dogfood | — |
+| 9 | **J** | Theme picker + calendar + NL quick-add + Habits | P1 | Full dogfood | — |
 | 10 | **K** | Widgets + App Intents (**consider**) | P1 | J dogfooded | Optional |
 | 11 | **L** | iPad / Mac polish | P1 | After J (flexible) | — |
 | — | **Daily driver** | Gate: prefer this app over TickTick/Reminders | P1 | M + dogfood + J | — |
-| 12+ | **N** | Habits, Kanban, Watch, collab, EventKit, etc. | P2 | Daily driver | Among themselves as desired |
+| 12+ | **N** | Eisenhower, Watch, collab, EventKit, etc. | P2 | Daily driver | Among themselves as desired |
 
 **Critical path (strict order):**  
 `Dec → A → B → (D ∥ E) → F → (G ∥ H) → I → MVP SHIP → M → dogfood → J → (consider K) → Daily driver → N`
@@ -910,7 +909,7 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 | **M9** | **MVP SHIP (code)** | **P0** | Phase I code complete |
 | M10 | Pomodoro in daily use | P1 | Phase M exit criteria |
 | **M11** | **Full dogfood** | **P1** | Real-week use + remaining manual MVP checks |
-| M12 | Theme + calendar + NL + Eisenhower | P1 | Phase J exit criteria |
+| M12 | Theme + calendar + NL + Habits | P1 | Phase J exit criteria |
 | M13 | Widgets useful (optional) | P1 | Phase K if undertaken |
 | M14 | iPad/Mac feel native | P1 | Phase L exit criteria |
 | **M15** | **Daily driver** | **P1** | P1 success criteria in `SCOPE.md` |
@@ -931,9 +930,10 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 | Temptation | Priority | Do this instead |
 |------------|----------|-----------------|
 | Widgets before Pomodoro + dogfood + J | P1 before locked order | Finish M → dogfood → J first; then *consider* K |
-| Habits before Pomodoro | Locked Focus first | Habits only in N if still wanted |
-| Calendar/NL/Eisenhower before dogfood | P1 before dogfood | Ship M, dogfood, then J |
-| Kanban early | P2 | Park in N |
+| Habits before Pomodoro | Locked Focus first for M; Habits in J after dogfood | Do not reopen D10 for M |
+| Calendar/NL/Habits before dogfood | P1 before dogfood | Ship M, dogfood, then J |
+| Eisenhower before Habits batch | Reordered 2026-08-25 | Eisenhower in N |
+| Kanban | Out of scope | Do not build |
 | Full Supabase sync on day one | P0 but late sequence | Local B–F first, then H |
 | Mac polish before iPhone Today works | P1 before P0 | Sequence L after MVP |
 | Theme picker before MVP | P1 | Notebook only until M9; theme in J |
@@ -961,7 +961,7 @@ Use only to decide **attention**, not schedules. Higher weight ⇒ expect more c
 | G | Notifications | P0 | W3 |
 | H | Supabase sync | P0 | W3 |
 | I | Hardening | P0 | W2 |
-| J | Theme/Calendar/NL/Eisenhower | P1 | W2–W3 |
+| J | Theme/Calendar/NL/Habits | P1 | W2–W3 |
 | K | Widgets/Intents (optional) | P1 | W2 |
 | L | Platform polish | P1 | W2 |
 | M | Pomodoro / Focus | P1 | W2 |

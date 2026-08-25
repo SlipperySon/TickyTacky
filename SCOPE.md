@@ -94,13 +94,13 @@ First-class **timetable** blocks — not just task due dates.
 
 **Ordered (2026-08-25):**
 
-1. **Pomodoro / Focus** (chosen over habits for Phase M)
+1. **Pomodoro / Focus** (Phase M — done locally)
 2. **Full dogfooding** (real-week use; finish remaining MVP manual checks)
 3. Then, as a batch:
    - [ ] Theme picker (additional token packs)
-   - [ ] Calendar views with tasks + timetable — **prefer merging into Upcoming** (toggle / hybrid) over a new root tab; decide after dogfood
+   - [ ] Calendar polish (Day/Week/Month shipped; further polish after dogfood)
    - [ ] Optional NL quick add
-   - [ ] Eisenhower matrix
+   - [ ] Habits
 4. After that batch: **consider** widgets + App Intents
 
 Also in P1 when capacity allows (not sequenced above):
@@ -113,8 +113,7 @@ Also in P1 when capacity allows (not sequenced above):
 
 ### P2 — Expansion
 
-- [ ] Habits (if still wanted after Focus)
-- [ ] Kanban
+- [ ] Eisenhower matrix
 - [ ] Widgets + App Intents (if not done after the P1 batch)
 - [ ] Attachments, analytics
 - [ ] Collaboration / shared lists
@@ -130,6 +129,7 @@ Also in P1 when capacity allows (not sequenced above):
 - CloudKit as primary database
 - Team/org workspaces
 - Marketplace / social
+- Kanban boards
 
 ---
 
@@ -155,8 +155,8 @@ Prefer Tickytacky over TickTick / Reminders for day-to-day planning.
 8. Notifications *(done; G8 device fire in dogfood)*
 9. **Pomodoro / Focus**
 10. **Full dogfood**
-11. Theme picker + calendar views + NL quick-add + Eisenhower matrix
-12. Consider widgets (+ App Intents); then polish / P2 as needed
+11. Theme picker + calendar polish + NL quick-add + Habits
+12. Consider widgets (+ App Intents); then polish / P2 (Eisenhower, …) as needed
 
 ---
 
@@ -171,5 +171,5 @@ _Mostly locked — see [`MEM.md`](MEM.md)._ Remaining non-blocking: push pipelin
 | Tier | Intent |
 |------|--------|
 | **P0 MVP** | Tasks + lists + recurrence + **timetable** + Supabase sync + reminders + Notebook UI |
-| **P1** | Pomodoro → dogfood → theme + calendar + NL + Eisenhower → *then consider* widgets |
-| **P2** | Habits (optional), Kanban, collab, Android/web, Watch, extras |
+| **P1** | Pomodoro → dogfood → theme + calendar + NL + Habits → *then consider* widgets |
+| **P2** | Eisenhower, collab, Android/web, Watch, extras |

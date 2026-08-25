@@ -71,16 +71,17 @@ Related docs:
 - **Still manual (MVP gate):** Sign in with Apple (needs paid Apple Developer), two-device sync smoke, G8 device fire — fold into full dogfood
 - Verdict: **shippable for local/personal use** with Focus timer; App Store / TestFlight wait on Apple Program + dogfood
 
-### Post-MVP roadmap (locked 2026-08-25)
-1. **Pomodoro / Focus** (Phase M — Focus path; habits deferred)
+### Post-MVP roadmap (locked 2026-08-25; habits↔Eisenhower swapped 2026-08-25 evening)
+1. **Pomodoro / Focus** (Phase M — done locally)
 2. **Full dogfooding** (real-week use + finish remaining MVP manual checks)
-3. **Theme picker** + **calendar views** (likely merged with **Upcoming**, not a new tab) + **NL quick-add** + **Eisenhower matrix**
+3. **Theme picker** + **calendar polish** + **NL quick-add** + **Habits**
 4. **Consider widgets** (+ App Intents) after that batch proves useful
+5. Later / P2: Eisenhower matrix, collab, …
 
 ### Open decisions (non-blocking)
 - [x] Mac vs iOS: native multiplatform target via XcodeGen (`supportedDestinations: [iOS, macOS]`)
 - [x] Local cache library: **GRDB**
-- [x] P1 focus feature: **Pomodoro / Focus** (not habits first)
+- [x] P1 focus feature: **Pomodoro / Focus** first (M); **Habits** in J after dogfood
 - [ ] Push: APNs via Supabase Edge / third-party later
 
 ### Explicit non-goals (for now)
@@ -90,14 +91,16 @@ Related docs:
 - CloudKit as primary database
 - Multiple selectable themes in MVP
 - PocketBase migration (unless Supabase blocked)
+- Kanban boards
 
 ---
 
 ## Active focus
 
 1. **Full dogfood** (incl. Apple Sign-In when enrolled, two-device sync, G8; exercise Focus)
-2. Then: theme picker → calendar views → NL quick-add → Eisenhower matrix
+2. Then: theme picker → calendar polish → NL quick-add → **Habits**
 3. After that batch: **consider widgets**
+4. Later: Eisenhower matrix, …
 
 ## Pre-start checklist
 
@@ -106,10 +109,10 @@ Related docs:
 - [x] App name: **Tickytacky**
 - [x] Defaults locked (table above)
 - [x] Docs aligned to API-first (this pass)
-- [x] Post-MVP order: Pomodoro → dogfood → theme/calendar/NL/Eisenhower → widgets later
+- [x] Post-MVP order: Pomodoro → dogfood → theme/calendar/NL/**Habits** → widgets later; Eisenhower deferred
 
 ### Defer
-- Habits (after Focus, if ever), Kanban, collab, widgets until post–Eisenhower batch
+- Eisenhower matrix, collab, widgets until after the Habits batch (widgets may come right after J)
 
 ---
 
@@ -137,6 +140,12 @@ Related docs:
 ## Log
 
 Newest first.
+
+### 2026-08-25 (drop Kanban)
+- Kanban removed from roadmap / non-goals
+
+### 2026-08-25 (roadmap: Habits over Eisenhower)
+- Phase J batch: theme + calendar polish + NL quick-add + **Habits** (Eisenhower moved to P2; Kanban dropped)
 
 ### 2026-08-25 (AU calendar)
 - Calendar tab order **Day | Week | Month**; `AppCalendar` en_AU + Monday week start; day-before-month dates; Colour spelling in schedule editor
