@@ -16,6 +16,11 @@ settings:
     MARKETING_VERSION: "0.1.0"
     # From local Apple Development identity (jamesrr.2006@icloud.com)
     DEVELOPMENT_TEAM: NR8MKXSX8K
+  configs:
+    Debug:
+      ENABLE_TESTABILITY: YES
+    Release:
+      ENABLE_TESTABILITY: NO
 packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift
@@ -48,12 +53,16 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
-        ENABLE_TESTABILITY: YES
         # Overridden by Secrets.xcconfig when present
         SUPABASE_URL: YOUR_SUPABASE_URL
         SUPABASE_ANON_KEY: YOUR_SUPABASE_ANON_KEY
         INFOPLIST_KEY_SUPABASE_URL: "$(SUPABASE_URL)"
         INFOPLIST_KEY_SUPABASE_ANON_KEY: "$(SUPABASE_ANON_KEY)"
+      configs:
+        Debug:
+          ENABLE_TESTABILITY: YES
+        Release:
+          ENABLE_TESTABILITY: NO
     dependencies:
       - package: GRDB
         product: GRDB

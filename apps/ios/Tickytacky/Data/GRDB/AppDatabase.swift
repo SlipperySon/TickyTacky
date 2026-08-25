@@ -1,7 +1,7 @@
 import Foundation
 import GRDB
 
-/// Local SQLite cache. Supabase remains source of truth once sync lands (Phase H).
+/// Local SQLite cache. Supabase is source of truth once the user is signed in (Phase H).
 final class AppDatabase: @unchecked Sendable {
     static let shared = makeShared()
 

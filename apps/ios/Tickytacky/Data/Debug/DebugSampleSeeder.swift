@@ -1,6 +1,7 @@
 import Foundation
 import GRDB
 
+#if DEBUG
 /// Inserts a rich local dataset for UI / calendar / focus dogfooding.
 /// Few lists (Inbox + Life + Groceries); context via tags + Group by tag.
 enum DebugSampleSeeder {
@@ -316,3 +317,4 @@ enum DebugSampleSeeder {
         return "Sample data: Life + Groceries lists, tags (Work, MATH101…), timetable, focus session."
     }
 }
+#endif

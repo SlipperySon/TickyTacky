@@ -49,7 +49,6 @@ struct TagDetailView: View {
             Button("Cancel", role: .cancel) {}
         }
         .task { reload() }
-        .onAppear { reload() }
         .onChange(of: showRename) { _, open in
             if !open { reload() }
         }

@@ -324,6 +324,31 @@ final class ScheduleService: @unchecked Sendable {
         )
     }
 
+    /// Days in `[from, to)` that have at least one timetable occurrence (batched by week).
+    func daysWithOccurrences(from: Date, to: Date, calendar: Calendar = .current) throws -> Set<Date> {
+        let rangeStart = calendar.startOfDay(for: from)
+        let rangeEnd = calendar.startOfDay(for: to)
+        guard rangeStart < rangeEnd else { return [] }
+
+        let weekday = calendar.component(.weekday, from: rangeStart)
+        let firstWeekday = calendar.firstWeekday
+        let diff = (weekday - firstWeekday + 7) % 7
+        var cursor = calendar.date(byAdding: .day, value: -diff, to: rangeStart) ?? rangeStart
+        var days: Set<Date> = []
+        while cursor < rangeEnd {
+            let weekOcc = try occurrences(weekStarting: cursor, calendar: calendar)
+            for occ in weekOcc {
+                let day = calendar.startOfDay(for: occ.start)
+                if day >= rangeStart, day < rangeEnd {
+                    days.insert(day)
+                }
+            }
+            guard let next = calendar.date(byAdding: .day, value: 7, to: cursor) else { break }
+            cursor = next
+        }
+        return days
+    }
+
     // MARK: - Private
 
     private func notifyRemindersChanged() {

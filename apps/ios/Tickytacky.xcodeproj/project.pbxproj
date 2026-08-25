@@ -28,7 +28,6 @@
 		3519AB6D3E3ECA04693FD1E7 /* TaskRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44B0F8BC31E58CF4E3E5F8C4 /* TaskRecord.swift */; };
 		3C44E5C21473141D497C8879 /* RecurrenceRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A1053BC132C4545ACC9D45 /* RecurrenceRule.swift */; };
 		3D447F2C309A6726A136DA1A /* ScheduleOccurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 127AD27D63EAFCEA19D3FEB0 /* ScheduleOccurrence.swift */; };
-		3D8CAB976912A461AFE32334 /* TimetablePlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3B065187D1C057A98D3C225 /* TimetablePlaceholderView.swift */; };
 		44651B60AEE581056D6695D0 /* ScheduleService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3C3749A766265F8876BE425 /* ScheduleService.swift */; };
 		455FA7598784EE3A63A68EF5 /* RecordID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8177B3D2299AC5B3FC2D26E7 /* RecordID.swift */; };
 		494CDE21C0ABE6A74D06D99E /* DueDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A8033DBD23D87F9B790755 /* DueDate.swift */; };
@@ -194,13 +193,12 @@
 		D9AF419711F110A203CCE8B6 /* TagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagRecord.swift; sourceTree = "<group>"; };
 		DC4D296659E8BA49F240FE2A /* CenterPlusTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CenterPlusTabBar.swift; sourceTree = "<group>"; };
 		DD4324509DA9AA421F87B95A /* ThemeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeTokens.swift; sourceTree = "<group>"; };
-		E3B065187D1C057A98D3C225 /* TimetablePlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimetablePlaceholderView.swift; sourceTree = "<group>"; };
 		E4CCF14BC3DACBA29BAA0093 /* NotebookTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTokens.swift; sourceTree = "<group>"; };
 		E7FF7E1056AF32D7A241C7DC /* PastelSwatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PastelSwatch.swift; sourceTree = "<group>"; };
 		F11284B3D92C837D989EDF9A /* ScheduleBlockValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleBlockValidation.swift; sourceTree = "<group>"; };
 		F3C3749A766265F8876BE425 /* ScheduleService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleService.swift; sourceTree = "<group>"; };
 		FE2AC67E87EA8B88B6860C99 /* Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migrations.swift; sourceTree = "<group>"; };
-		"TEMP_A09A3073-79EE-4A02-81CA-3CE2237CA389" /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		"TEMP_92DEAD5F-5771-40A3-8E22-47019DCA939C" /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -470,7 +468,6 @@
 				8F8093C4236FE1C549C33860 /* MonthCalendarView.swift */,
 				907AE87967DB616926E136FE /* OccurrenceActionsSheet.swift */,
 				1912BB333B0CA23EEB2DAE4B /* ScheduleBlockEditorSheet.swift */,
-				E3B065187D1C057A98D3C225 /* TimetablePlaceholderView.swift */,
 				87E6536610202EC57E3A2721 /* TimetableView.swift */,
 			);
 			path = Schedule;
@@ -577,10 +574,10 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		"TEMP_94EA1519-3E60-43BE-A8FF-2D27676813E6" /* ios */ = {
+		"TEMP_F81A71D1-6B5C-475F-902D-FE8F8147B8AF" /* ios */ = {
 			isa = PBXGroup;
 			children = (
-				"TEMP_A09A3073-79EE-4A02-81CA-3CE2237CA389" /* Config.xcconfig */,
+				"TEMP_92DEAD5F-5771-40A3-8E22-47019DCA939C" /* Config.xcconfig */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -758,7 +755,6 @@
 				855C7B7F688C123EA5E2C990 /* TaskTagRecord.swift in Sources */,
 				295CB973F612A72E690754D3 /* ThemeTokens.swift in Sources */,
 				9486DEF502BA19E0ECBECCA3 /* TickytackyApp.swift in Sources */,
-				3D8CAB976912A461AFE32334 /* TimetablePlaceholderView.swift in Sources */,
 				83A3D65EF5C5829736F02CCB /* TimetableView.swift in Sources */,
 				176FE8F1AFA0E753877DCC16 /* TodayAssembler.swift in Sources */,
 				254BE700E4D852E629460CC7 /* TodayView.swift in Sources */,
@@ -795,7 +791,7 @@
 /* Begin XCBuildConfiguration section */
 		1CE8D99474FF343C656DEBE2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_A09A3073-79EE-4A02-81CA-3CE2237CA389" /* Config.xcconfig */;
+			baseConfigurationReference = "TEMP_92DEAD5F-5771-40A3-8E22-47019DCA939C" /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -833,6 +829,7 @@
 				DEVELOPMENT_TEAM = NR8MKXSX8K;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -856,7 +853,7 @@
 		};
 		1FEBF36CAAA998D4908D6EDA /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = "TEMP_A09A3073-79EE-4A02-81CA-3CE2237CA389" /* Config.xcconfig */;
+			baseConfigurationReference = "TEMP_92DEAD5F-5771-40A3-8E22-47019DCA939C" /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -932,7 +929,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NR8MKXSX8K;
 				ENABLE_HARDENED_RUNTIME = YES;
-				ENABLE_TESTABILITY = YES;
+				ENABLE_TESTABILITY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tickytacky/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Tickytacky;

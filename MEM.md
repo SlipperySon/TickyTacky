@@ -141,6 +141,11 @@ Related docs:
 
 Newest first.
 
+### 2026-08-25 (audit: security + tidy + perf)
+- Security: sample seeder `#if DEBUG` only; Apple Sign-In nonce; sign-out wipes local cache; Release `ENABLE_TESTABILITY=NO`; RLS same-owner FK migration `00007`
+- Perf: list/tag summary SQL aggregates; month calendar batched marks; sync dirty SQL counts/fetches
+- Tidy: removed `TimetablePlaceholderView`; deduped `.task`/`.onAppear` reloads; force-unwrap cleanups
+
 ### 2026-08-25 (drop Kanban)
 - Kanban removed from roadmap / non-goals
 

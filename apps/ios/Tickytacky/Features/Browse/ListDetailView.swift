@@ -88,7 +88,6 @@ struct ListDetailView: View {
             Button("Cancel", role: .cancel) {}
         }
         .task { reload() }
-        .onAppear { reload() }
         .onChange(of: showQuickAdd) { _, open in
             if !open { reload() }
         }

@@ -36,7 +36,6 @@ struct TodayView: View {
             OccurrenceActionsSheet(occurrence: occurrence) { reload() }
         }
         .task { reload() }
-        .onAppear { reload() }
         .onReceive(NotificationCenter.default.publisher(for: .tickytackyContentDidChange)) { _ in
             reload()
         }

@@ -28,23 +28,35 @@ final class TagService: @unchecked Sendable {
 
     func fetchSummaries() throws -> [TagSummary] {
         try database.dbQueue.read { db in
-            let tags = try TagRecord
-                .filter(TagRecord.Columns.deletedAt == nil)
-                .order(TagRecord.Columns.name.asc)
-                .fetchAll(db)
-            return try tags.map { tag in
-                let count = try Int.fetchOne(
-                    db,
-                    sql: """
-                    SELECT COUNT(*) FROM task_tags tt
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                SELECT g.*, COALESCE(c.open_count, 0) AS open_count
+                FROM tags g
+                LEFT JOIN (
+                    SELECT tt.tag_id AS tag_id, COUNT(*) AS open_count
+                    FROM task_tags tt
                     INNER JOIN tasks t ON t.id = tt.task_id
-                    WHERE tt.tag_id = ?
-                      AND t.deleted_at IS NULL
-                      AND t.is_completed = 0
-                    """,
-                    arguments: [tag.id]
-                ) ?? 0
-                return TagSummary(tag: tag, openTaskCount: count)
+                    WHERE t.deleted_at IS NULL AND t.is_completed = 0
+                    GROUP BY tt.tag_id
+                ) c ON c.tag_id = g.id
+                WHERE g.deleted_at IS NULL
+                ORDER BY g.name COLLATE NOCASE ASC
+                """
+            )
+            return rows.map { row in
+                TagSummary(
+                    tag: TagRecord(
+                        id: row["id"],
+                        name: row["name"],
+                        color: row["color"],
+                        createdAt: row["created_at"],
+                        updatedAt: row["updated_at"],
+                        deletedAt: row["deleted_at"],
+                        syncedAt: row["synced_at"]
+                    ),
+                    openTaskCount: row["open_count"]
+                )
             }
         }
     }

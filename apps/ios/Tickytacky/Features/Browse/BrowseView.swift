@@ -100,7 +100,6 @@ struct BrowseView: View {
             pane = initialPane
             reloadLists()
         }
-        .onAppear { reloadLists() }
         .onReceive(NotificationCenter.default.publisher(for: .tickytackySelectBrowsePane)) { note in
             if let raw = note.object as? String, let next = BrowsePane(rawValue: raw) {
                 pane = next

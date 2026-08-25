@@ -224,9 +224,9 @@ final class SyncEngine {
             database: database,
             table: "lists",
             dirty: try await database.dbQueue.read { db in
-                try TaskListRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try TaskListRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -238,9 +238,9 @@ final class SyncEngine {
             database: database,
             table: "tags",
             dirty: try await database.dbQueue.read { db in
-                try TagRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try TagRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -248,9 +248,9 @@ final class SyncEngine {
         )
 
         let dirtyTasks = try await database.dbQueue.read { db in
-            try TaskRecord.fetchAll(db).filter {
-                SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-            }
+            try TaskRecord
+                .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                .fetchAll(db)
         }
         try await pushEntity(
             client: client,
@@ -267,9 +267,9 @@ final class SyncEngine {
             database: database,
             table: "subtasks",
             dirty: try await database.dbQueue.read { db in
-                try SubtaskRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try SubtaskRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -281,9 +281,9 @@ final class SyncEngine {
             database: database,
             table: "schedules",
             dirty: try await database.dbQueue.read { db in
-                try ScheduleRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try ScheduleRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -295,9 +295,9 @@ final class SyncEngine {
             database: database,
             table: "schedule_blocks",
             dirty: try await database.dbQueue.read { db in
-                try ScheduleBlockRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try ScheduleBlockRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -309,9 +309,9 @@ final class SyncEngine {
             database: database,
             table: "schedule_exceptions",
             dirty: try await database.dbQueue.read { db in
-                try ScheduleExceptionRecord.fetchAll(db).filter {
-                    SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-                }
+                try ScheduleExceptionRecord
+                    .filter(sql: "synced_at IS NULL OR updated_at > synced_at")
+                    .fetchAll(db)
             },
             id: \.id,
             updatedAt: \.updatedAt,
@@ -684,28 +684,20 @@ final class SyncEngine {
     }
 
     private static func countDirty(_ db: Database) throws -> Int {
+        let tables = [
+            "lists", "tasks", "subtasks", "tags",
+            "schedules", "schedule_blocks", "schedule_exceptions"
+        ]
         var count = 0
-        count += try TaskListRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try TaskRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try SubtaskRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try TagRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try ScheduleRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try ScheduleBlockRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
-        count += try ScheduleExceptionRecord.fetchAll(db).filter {
-            SyncMapper.isDirty(updatedAt: $0.updatedAt, syncedAt: $0.syncedAt)
-        }.count
+        for table in tables {
+            count += try Int.fetchOne(
+                db,
+                sql: """
+                SELECT COUNT(*) FROM \(table)
+                WHERE synced_at IS NULL OR updated_at > synced_at
+                """
+            ) ?? 0
+        }
         return count
     }
 }

@@ -1,3 +1,4 @@
+import CryptoKit
 import AuthenticationServices
 import Foundation
 import Observation
@@ -18,6 +19,8 @@ final class AuthService {
     var userEmail: String? { session?.user.email }
 
     private var authListenerTask: Task<Void, Never>?
+    /// Raw nonce for the in-flight Apple Sign In (hashed form sent to Apple).
+    private var pendingAppleNonce: String?
 
     private init() {
         guard SupabaseClientConfig.client != nil else { return }
@@ -38,8 +41,16 @@ final class AuthService {
         }
     }
 
+    /// Configures the Apple request with scopes + SHA-256 nonce (Supabase requires nonce).
+    func prepareAppleSignInRequest(_ request: ASAuthorizationAppleIDRequest) {
+        let nonce = Self.randomNonce()
+        pendingAppleNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = Self.sha256Hex(nonce)
+    }
+
     /// Exchange an Apple identity token for a Supabase session.
-    func signInWithApple(idToken: String, fullName: PersonNameComponents? = nil) async {
+    func signInWithApple(idToken: String, nonce: String?, fullName: PersonNameComponents? = nil) async {
         guard let client = SupabaseClientConfig.client else {
             lastError = "Supabase is not configured. Add URL and anon key in Secrets.xcconfig."
             return
@@ -49,9 +60,14 @@ final class AuthService {
         defer { isLoading = false }
         do {
             let result = try await client.auth.signInWithIdToken(
-                credentials: .init(provider: .apple, idToken: idToken)
+                credentials: .init(
+                    provider: .apple,
+                    idToken: idToken,
+                    nonce: nonce
+                )
             )
             session = result
+            pendingAppleNonce = nil
             if let fullName {
                 let parts = [fullName.givenName, fullName.familyName].compactMap { $0 }
                 let joined = parts.joined(separator: " ")
@@ -85,7 +101,8 @@ final class AuthService {
                 lastError = AuthError.missingIdentityToken.localizedDescription
                 return
             }
-            await signInWithApple(idToken: idToken, fullName: credential.fullName)
+            let nonce = pendingAppleNonce
+            await signInWithApple(idToken: idToken, nonce: nonce, fullName: credential.fullName)
             if isSignedIn {
                 SyncEngine.shared.syncIfPossible()
             }
@@ -95,6 +112,7 @@ final class AuthService {
     func signOut() async {
         guard let client = SupabaseClientConfig.client else {
             session = nil
+            clearLocalUserCache()
             return
         }
         isLoading = true
@@ -103,9 +121,17 @@ final class AuthService {
         do {
             try await client.auth.signOut()
             session = nil
+            clearLocalUserCache()
         } catch {
             lastError = error.localizedDescription
         }
+    }
+
+    /// Wipe local domain data so a shared device cannot browse the previous account offline.
+    private func clearLocalUserCache() {
+        try? AppDatabase.shared.resetUserData()
+        SyncEngine.shared.refreshDirtyCount()
+        NotificationCenter.default.post(name: .tickytackyContentDidChange, object: nil)
     }
 
     private func listenForAuthChanges() async {
@@ -123,6 +149,25 @@ final class AuthService {
                 break
             }
         }
+    }
+
+    private static func randomNonce(length: Int = 32) -> String {
+        let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        result.reserveCapacity(length)
+        for _ in 0..<length {
+            var byte: UInt8 = 0
+            let status = SecRandomCopyBytes(kSecRandomDefault, 1, &byte)
+            precondition(status == errSecSuccess, "Unable to generate nonce")
+            result.append(charset[Int(byte) % charset.count])
+        }
+        return result
+    }
+
+    private static func sha256Hex(_ input: String) -> String {
+        let data = Data(input.utf8)
+        let hash = SHA256.hash(data: data)
+        return hash.map { String(format: "%02x", $0) }.joined()
     }
 }
 

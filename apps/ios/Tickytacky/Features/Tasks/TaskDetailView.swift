@@ -400,9 +400,10 @@ struct TaskDetailView: View {
                 startDate: start
             )
             if task.dueDate == nil {
-                task.dueDate = DueDate.startOfDay(start)
+                let due = DueDate.startOfDay(start)
+                task.dueDate = due
                 hasDueDate = true
-                dueDateValue = task.dueDate!
+                dueDateValue = due
             }
         } else {
             task.recurrenceRule = nil

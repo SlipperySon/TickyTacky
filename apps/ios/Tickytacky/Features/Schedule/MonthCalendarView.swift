@@ -283,12 +283,29 @@ struct MonthCalendarView: View {
     }
 
     private func rebuildMarks() {
+        let days = daysInMonthGrid
+        guard let first = days.first, let last = days.last,
+              let endExclusive = calendar.date(byAdding: .day, value: 1, to: last)
+        else {
+            dayMarks = [:]
+            return
+        }
+        let scheduleDays = (try? database.schedules.daysWithOccurrences(
+            from: first,
+            to: endExclusive,
+            calendar: calendar
+        )) ?? []
+        let taskDays = (try? database.tasks.daysWithDueTasks(
+            from: first,
+            to: endExclusive,
+            calendar: calendar
+        )) ?? []
         var marks: [Date: DayMark] = [:]
-        for day in daysInMonthGrid {
-            let occ = (try? database.schedules.occurrences(forDay: day, calendar: calendar)) ?? []
-            let tasks = (try? database.tasks.fetchDue(on: day, calendar: calendar)) ?? []
-            if !occ.isEmpty || !tasks.isEmpty {
-                marks[day] = DayMark(hasSchedule: !occ.isEmpty, hasTasks: !tasks.isEmpty)
+        for day in days {
+            let hasSchedule = scheduleDays.contains(day)
+            let hasTasks = taskDays.contains(day)
+            if hasSchedule || hasTasks {
+                marks[day] = DayMark(hasSchedule: hasSchedule, hasTasks: hasTasks)
             }
         }
         dayMarks = marks

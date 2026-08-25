@@ -104,10 +104,11 @@ final class FocusEngine {
             activeSessionId = session.id
             isRunning = true
             endDate = Date().addingTimeInterval(TimeInterval(remainingSeconds))
+            guard let fireDate = endDate else { return }
             await ReminderScheduler.shared.ensureAuthorizedForReminder()
             await ReminderScheduler.shared.scheduleFocusEnd(
                 sessionId: session.id,
-                fireDate: endDate!,
+                fireDate: fireDate,
                 title: phase.isBreak ? "Break over" : "Focus complete",
                 body: phase.isBreak
                     ? "Ready for another focus block?"

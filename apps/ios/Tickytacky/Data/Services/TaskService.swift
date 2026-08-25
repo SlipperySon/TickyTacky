@@ -114,6 +114,27 @@ final class TaskService: @unchecked Sendable {
         }
     }
 
+    /// Start-of-day dates that have at least one incomplete due task in `[from, to)`.
+    func daysWithDueTasks(from: Date, to: Date, calendar: Calendar = .current) throws -> Set<Date> {
+        let start = DueDate.startOfDay(from, calendar: calendar)
+        let end = DueDate.startOfDay(to, calendar: calendar)
+        let dates: [Date] = try database.dbQueue.read { db in
+            try Date.fetchAll(
+                db,
+                sql: """
+                SELECT DISTINCT due_date FROM tasks
+                WHERE deleted_at IS NULL
+                  AND is_completed = 0
+                  AND due_date IS NOT NULL
+                  AND due_date >= ?
+                  AND due_date < ?
+                """,
+                arguments: [start, end]
+            )
+        }
+        return Set(dates.map { DueDate.startOfDay($0, calendar: calendar) })
+    }
+
     /// Incomplete tasks with due dates from tomorrow through `days` ahead, grouped by day.
     /// Within each day, sorted via `TaskOrdering` (priority → due time → sortOrder).
     func fetchUpcoming(days: Int = 7) throws -> [(day: Date, tasks: [TaskRecord])] {

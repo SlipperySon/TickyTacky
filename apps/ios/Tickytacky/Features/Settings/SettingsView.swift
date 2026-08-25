@@ -12,7 +12,9 @@ struct SettingsView: View {
     @State private var auth = AuthService.shared
     @State private var sync = SyncEngine.shared
     @State private var notificationStatus: ReminderScheduler.AuthorizationStatus = .notDetermined
+    #if DEBUG
     @State private var sampleSeedMessage: String?
+    #endif
 
     var body: some View {
         Group {
@@ -30,7 +32,9 @@ struct SettingsView: View {
             syncSection
             focusSection
             notificationsSection
+            #if DEBUG
             debugSampleSection
+            #endif
             aboutSection
         }
         .scrollContentBackground(.hidden)
@@ -82,7 +86,7 @@ struct SettingsView: View {
                         .foregroundStyle(theme.inkMuted)
                 }
                 SignInWithAppleButton(.signIn) { request in
-                    request.requestedScopes = [.fullName, .email]
+                    auth.prepareAppleSignInRequest(request)
                 } onCompletion: { result in
                     Task { await auth.handleAppleAuthorization(result) }
                 }
@@ -265,6 +269,7 @@ struct SettingsView: View {
         }
     }
 
+    #if DEBUG
     private var debugSampleSection: some View {
         Section {
             Button("Insert sample data") {
@@ -288,6 +293,7 @@ struct SettingsView: View {
                 .foregroundStyle(theme.inkFaint)
         }
     }
+    #endif
 
     @MainActor
     private func reloadNotificationStatus() async {

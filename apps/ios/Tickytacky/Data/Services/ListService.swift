@@ -26,19 +26,37 @@ final class ListService: @unchecked Sendable {
 
     func fetchSummaries() throws -> [ListSummary] {
         try database.dbQueue.read { db in
-            let lists = try TaskListRecord
-                .filter(TaskListRecord.Columns.deletedAt == nil)
-                .order(TaskListRecord.Columns.isInbox.desc, TaskListRecord.Columns.sortOrder, TaskListRecord.Columns.name)
-                .fetchAll(db)
-            return try lists.map { list in
-                let count = try TaskRecord
-                    .filter(
-                        TaskRecord.Columns.listId == list.id
-                            && TaskRecord.Columns.deletedAt == nil
-                            && TaskRecord.Columns.isCompleted == false
-                    )
-                    .fetchCount(db)
-                return ListSummary(list: list, openTaskCount: count)
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                SELECT l.*, COALESCE(c.open_count, 0) AS open_count
+                FROM lists l
+                LEFT JOIN (
+                    SELECT list_id, COUNT(*) AS open_count
+                    FROM tasks
+                    WHERE deleted_at IS NULL AND is_completed = 0
+                    GROUP BY list_id
+                ) c ON c.list_id = l.id
+                WHERE l.deleted_at IS NULL
+                ORDER BY l.is_inbox DESC, l.sort_order ASC, l.name COLLATE NOCASE ASC
+                """
+            )
+            return rows.map { row in
+                ListSummary(
+                    list: TaskListRecord(
+                        id: row["id"],
+                        name: row["name"],
+                        color: row["color"],
+                        icon: row["icon"],
+                        sortOrder: row["sort_order"],
+                        isInbox: row["is_inbox"],
+                        createdAt: row["created_at"],
+                        updatedAt: row["updated_at"],
+                        deletedAt: row["deleted_at"],
+                        syncedAt: row["synced_at"]
+                    ),
+                    openTaskCount: row["open_count"]
+                )
             }
         }
     }
