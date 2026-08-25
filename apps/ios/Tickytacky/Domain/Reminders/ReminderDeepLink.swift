@@ -4,6 +4,7 @@ import Foundation
 enum ReminderDeepLink: Equatable, Sendable {
     case task(id: String)
     case occurrence(blockId: String, originalStart: Date)
+    case focus(sessionId: String?)
 
     static let urlScheme = "tickytacky"
 
@@ -21,6 +22,9 @@ enum ReminderDeepLink: Equatable, Sendable {
                   let originalStart = ISO8601DateFormatter().date(from: stamp)
             else { return nil }
             return .occurrence(blockId: blockId, originalStart: originalStart)
+        case .focus:
+            let sessionId = userInfo[ReminderUserInfoKey.sessionId] as? String
+            return .focus(sessionId: sessionId?.isEmpty == true ? nil : sessionId)
         }
     }
 
@@ -40,6 +44,9 @@ enum ReminderDeepLink: Equatable, Sendable {
             let stamp = comps?.queryItems?.first(where: { $0.name == "originalStart" })?.value
             guard let stamp, let originalStart = ISO8601DateFormatter().date(from: stamp) else { return nil }
             return .occurrence(blockId: blockId, originalStart: originalStart)
+        case "focus":
+            let sessionId = pathParts.first
+            return .focus(sessionId: sessionId?.isEmpty == true ? nil : sessionId)
         default:
             return nil
         }
@@ -61,10 +68,17 @@ enum ReminderDeepLink: Equatable, Sendable {
                 )
             ]
             return comps.url
+        case .focus(let sessionId):
+            if let sessionId, !sessionId.isEmpty {
+                return URL(string: "\(Self.urlScheme)://focus/\(sessionId)")
+            }
+            return URL(string: "\(Self.urlScheme)://focus")
         }
     }
 }
 
 extension Notification.Name {
     static let tickytackyOpenReminderDeepLink = Notification.Name("tickytackyOpenReminderDeepLink")
+    /// Open Focus tab; optional `object` is a task id `String`.
+    static let tickytackyOpenFocus = Notification.Name("tickytackyOpenFocus")
 }

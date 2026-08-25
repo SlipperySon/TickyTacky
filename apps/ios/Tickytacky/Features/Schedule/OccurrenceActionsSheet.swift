@@ -19,8 +19,10 @@ struct OccurrenceActionsSheet: View {
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.timeStyle = .short
+        f.locale = AppCalendar.locale
+        f.calendar = AppCalendar.gregorian
         f.dateStyle = .medium
+        f.timeStyle = .short
         return f
     }()
 

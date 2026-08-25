@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var auth = AuthService.shared
     @State private var sync = SyncEngine.shared
     @State private var notificationStatus: ReminderScheduler.AuthorizationStatus = .notDetermined
+    @State private var sampleSeedMessage: String?
 
     var body: some View {
         Group {
@@ -27,7 +28,9 @@ struct SettingsView: View {
         List {
             accountSection
             syncSection
+            focusSection
             notificationsSection
+            debugSampleSection
             aboutSection
         }
         .scrollContentBackground(.hidden)
@@ -155,6 +158,61 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
+    private var focusSection: some View {
+        Section {
+            Stepper(value: Binding(
+                get: { FocusSettings.workMinutes },
+                set: {
+                    FocusSettings.workMinutes = $0
+                    FocusEngine.shared.reloadDurationsFromSettings()
+                }
+            ), in: 1...90) {
+                LabeledContent("Focus", value: "\(FocusSettings.workMinutes) min")
+            }
+            Stepper(value: Binding(
+                get: { FocusSettings.shortBreakMinutes },
+                set: {
+                    FocusSettings.shortBreakMinutes = $0
+                    FocusEngine.shared.reloadDurationsFromSettings()
+                }
+            ), in: 1...30) {
+                LabeledContent("Short break", value: "\(FocusSettings.shortBreakMinutes) min")
+            }
+            Stepper(value: Binding(
+                get: { FocusSettings.longBreakMinutes },
+                set: {
+                    FocusSettings.longBreakMinutes = $0
+                    FocusEngine.shared.reloadDurationsFromSettings()
+                }
+            ), in: 1...60) {
+                LabeledContent("Long break", value: "\(FocusSettings.longBreakMinutes) min")
+            }
+            Stepper(value: Binding(
+                get: { FocusSettings.sessionsUntilLongBreak },
+                set: { FocusSettings.sessionsUntilLongBreak = $0 }
+            ), in: 2...8) {
+                LabeledContent("Long break every", value: "\(FocusSettings.sessionsUntilLongBreak) focus")
+            }
+            Toggle("Auto-start break", isOn: Binding(
+                get: { FocusSettings.autoStartBreak },
+                set: { FocusSettings.autoStartBreak = $0 }
+            ))
+            .tint(theme.accent)
+            Toggle("Auto-start next focus", isOn: Binding(
+                get: { FocusSettings.autoStartWork },
+                set: { FocusSettings.autoStartWork = $0 }
+            ))
+            .tint(theme.accent)
+        } header: {
+            Text("Focus")
+                .accessibilityAddTraits(.isHeader)
+        } footer: {
+            Text("Classic Pomodoro defaults: 25 / 5 / 15. Sessions stay on this device.")
+                .foregroundStyle(theme.inkFaint)
+        }
+    }
+
+    @ViewBuilder
     private var notificationsSection: some View {
         Section {
             LabeledContent("Status") {
@@ -204,6 +262,30 @@ struct SettingsView: View {
         } header: {
             Text("About")
                 .accessibilityAddTraits(.isHeader)
+        }
+    }
+
+    private var debugSampleSection: some View {
+        Section {
+            Button("Insert sample data") {
+                do {
+                    sampleSeedMessage = try DebugSampleSeeder.seed(database: .shared)
+                } catch {
+                    sampleSeedMessage = error.localizedDescription
+                }
+            }
+            .tint(theme.accent)
+            if let sampleSeedMessage {
+                Text(sampleSeedMessage)
+                    .font(.footnote)
+                    .foregroundStyle(theme.inkMuted)
+            }
+        } header: {
+            Text("Debug")
+                .accessibilityAddTraits(.isHeader)
+        } footer: {
+            Text("Adds Life + Groceries, tags (Work, MATH101…), overdue & upcoming tasks, timetable, and a focus session. Group by tag is turned on. Re-running adds another task batch; schedule blocks only seed when empty.")
+                .foregroundStyle(theme.inkFaint)
         }
     }
 

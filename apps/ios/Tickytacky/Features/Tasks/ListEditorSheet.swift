@@ -24,6 +24,11 @@ struct ListEditorSheet: View {
                     TextField("List name", text: $name)
                         .submitLabel(.done)
                         .onSubmit { save() }
+                } footer: {
+                    if case .create = mode {
+                        Text("Keep lists few. Use tags for classes and projects, then Group by tag inside a list.")
+                            .foregroundStyle(theme.inkFaint)
+                    }
                 }
                 if let errorMessage {
                     Section {

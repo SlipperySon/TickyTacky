@@ -223,5 +223,32 @@ enum AppMigrations {
                 """)
             try db.execute(sql: "PRAGMA foreign_keys = ON")
         }
+
+        /// Local Focus / Pomodoro sessions (not synced in MVP).
+        migrator.registerMigration("v9_focus") { db in
+            try db.create(table: "focus_sessions") { t in
+                t.column("id", .text).primaryKey()
+                t.column("task_id", .text)
+                    .references("tasks", onDelete: .setNull)
+                t.column("kind", .integer).notNull()
+                t.column("planned_seconds", .integer).notNull()
+                t.column("started_at", .datetime).notNull()
+                t.column("ended_at", .datetime)
+                t.column("completed_at", .datetime)
+                t.column("created_at", .datetime).notNull()
+                t.column("updated_at", .datetime).notNull()
+                t.column("deleted_at", .datetime)
+            }
+            try db.create(
+                index: "focus_sessions_started",
+                on: "focus_sessions",
+                columns: ["started_at", "deleted_at"]
+            )
+            try db.create(
+                index: "focus_sessions_task",
+                on: "focus_sessions",
+                columns: ["task_id", "deleted_at"]
+            )
+        }
     }
 }

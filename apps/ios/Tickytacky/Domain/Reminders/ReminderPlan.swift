@@ -15,6 +15,7 @@ struct ReminderPlan: Equatable, Sendable, Identifiable {
 enum ReminderDeepLinkKind: String, Sendable {
     case task
     case occurrence
+    case focus
 }
 
 enum ReminderUserInfoKey {
@@ -22,4 +23,5 @@ enum ReminderUserInfoKey {
     static let taskId = "taskId"
     static let blockId = "blockId"
     static let originalStart = "originalStart"
+    static let sessionId = "sessionId"
 }

@@ -142,7 +142,9 @@ final class ReminderScheduler: NSObject, UNUserNotificationCenterDelegate {
         let selectedIds = Set(selected.map(\.identifier))
 
         let pending = await center.pendingNotificationRequests()
-        let obsoletePending = pending.map(\.identifier).filter { !selectedIds.contains($0) }
+        let obsoletePending = pending.map(\.identifier).filter { id in
+            !selectedIds.contains(id) && !id.hasPrefix("tt.focus.")
+        }
         if !obsoletePending.isEmpty {
             center.removePendingNotificationRequests(withIdentifiers: obsoletePending)
         }
@@ -150,7 +152,9 @@ final class ReminderScheduler: NSObject, UNUserNotificationCenterDelegate {
         let delivered = await center.deliveredNotifications()
         let obsoleteDelivered = delivered
             .map(\.request.identifier)
-            .filter { $0.hasPrefix("tt.") && !selectedIds.contains($0) }
+            .filter { id in
+                id.hasPrefix("tt.") && !id.hasPrefix("tt.focus.") && !selectedIds.contains(id)
+            }
         if !obsoleteDelivered.isEmpty {
             center.removeDeliveredNotifications(withIdentifiers: obsoleteDelivered)
         }
@@ -174,6 +178,52 @@ final class ReminderScheduler: NSObject, UNUserNotificationCenterDelegate {
             )
             try? await center.add(request)
         }
+    }
+
+    // MARK: - Focus / Pomodoro (M-F4)
+
+    static func focusNotificationId(sessionId: String) -> String {
+        "tt.focus.\(sessionId)"
+    }
+
+    func scheduleFocusEnd(
+        sessionId: String,
+        fireDate: Date,
+        title: String,
+        body: String
+    ) async {
+        configure()
+        let status = await authorizationStatus()
+        guard status.isUsable else { return }
+        guard fireDate > Date() else { return }
+
+        let identifier = Self.focusNotificationId(sessionId: sessionId)
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.userInfo = [
+            ReminderUserInfoKey.kind: ReminderDeepLinkKind.focus.rawValue,
+            ReminderUserInfoKey.sessionId: sessionId,
+        ]
+
+        var calendar = Calendar.current
+        calendar.timeZone = .current
+        let comps = calendar.dateComponents(
+            [.year, .month, .day, .hour, .minute, .second],
+            from: fireDate
+        )
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        try? await center.add(request)
+    }
+
+    func cancelFocusEnd(sessionId: String) {
+        let identifier = Self.focusNotificationId(sessionId: sessionId)
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        center.removeDeliveredNotifications(withIdentifiers: [identifier])
     }
 
     // MARK: - UNUserNotificationCenterDelegate (G7)

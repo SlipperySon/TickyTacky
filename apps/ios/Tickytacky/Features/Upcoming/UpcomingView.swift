@@ -1,26 +1,41 @@
 import SwiftUI
 
-/// One calendar day on Upcoming: schedule blocks (optional) + due tasks.
-private struct UpcomingDayGroup: Identifiable {
-    var day: Date
-    var occurrences: [ScheduleOccurrence]
-    var tasks: [TaskRecord]
+enum UpcomingPane: String, CaseIterable, Identifiable {
+    case day
+    case week
+    case month
 
-    var id: Date { day }
+    var id: String { rawValue }
 
-    var isEmpty: Bool { occurrences.isEmpty && tasks.isEmpty }
+    var label: String {
+        switch self {
+        case .day: "Day"
+        case .week: "Week"
+        case .month: "Month"
+        }
+    }
+
+    private static let storageKey = "calendar.selectedPane"
+
+    static var stored: UpcomingPane {
+        get {
+            guard let raw = UserDefaults.standard.string(forKey: storageKey) else { return .day }
+            if raw == "agenda" { return .week }
+            return UpcomingPane(rawValue: raw) ?? .day
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: storageKey)
+        }
+    }
 }
 
+/// Calendar tab: Day Gantt, weekly timetable, or month grid (AU week starts Monday).
 struct UpcomingView: View {
-    @Environment(\.appDatabase) private var database
-    @Environment(\.calendar) private var calendar
     private let theme = Theme.current
 
     var embedsNavigationStack: Bool = true
 
-    @State private var groups: [UpcomingDayGroup] = []
-    @State private var selectedOccurrence: ScheduleOccurrence?
-    @State private var selectedTaskIds: Set<String> = []
+    @State private var pane: UpcomingPane = .stored
 
     var body: some View {
         Group {
@@ -33,139 +48,49 @@ struct UpcomingView: View {
     }
 
     private var root: some View {
-        ZStack {
-            theme.canvas.ignoresSafeArea()
-            content
-        }
-        .navigationTitle("Upcoming")
-        .sheet(item: $selectedOccurrence) { occurrence in
-            OccurrenceActionsSheet(occurrence: occurrence) { reload() }
-        }
-        .task { reload() }
-        .onAppear { reload() }
-        .onTaskListDeleteCommand(selection: selectedTaskIds) { ids in
-            softDeleteTasks(ids)
-        }
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if groups.isEmpty {
-            EmptyStateView(
-                title: "No upcoming items",
-                message: "Due dates and schedule blocks for the next week will show here."
-            )
-            .padding(20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        } else {
-            List(selection: $selectedTaskIds) {
-                ForEach(groups) { group in
-                    Section {
-                        ForEach(group.occurrences) { occurrence in
-                            Button {
-                                selectedOccurrence = occurrence
-                            } label: {
-                                ScheduleOccurrenceRow(occurrence: occurrence)
-                            }
-                            .buttonStyle(.plain)
-                            .listRowBackground(theme.canvas)
-                            .listRowSeparatorTint(theme.rule)
-                            .accessibilityHint("Opens occurrence actions")
-                        }
-                        ForEach(group.tasks) { task in
-                            NavigationLink {
-                                TaskDetailView(taskId: task.id)
-                            } label: {
-                                TaskRow(task: task) {
-                                    toggle(task)
-                                }
-                            }
-                            .listRowBackground(theme.canvas)
-                            .listRowSeparatorTint(theme.rule)
-                            .tag(task.id)
-                        }
-                        .onDelete { softDeleteTasks(in: group, at: $0) }
-                    } header: {
-                        Text(dayTitle(group.day))
-                            .font(.system(.subheadline, design: .rounded).weight(.semibold))
-                            .foregroundStyle(theme.inkMuted)
-                            .textCase(nil)
-                            .accessibilityAddTraits(.isHeader)
-                            .accessibilityLabel(dayTitle(group.day))
-                    }
+        VStack(spacing: 0) {
+            Picker("Calendar", selection: $pane) {
+                ForEach(UpcomingPane.allCases) { item in
+                    Text(item.label).tag(item)
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .refreshable { reload() }
-        }
-    }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(theme.canvas)
 
-    private func dayTitle(_ day: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE, MMM d"
-        return formatter.string(from: day)
-    }
-
-    private func reload() {
-        let taskGroups = (try? database.tasks.fetchUpcoming(days: 7)) ?? []
-        var tasksByDay: [Date: [TaskRecord]] = [:]
-        for group in taskGroups {
-            let day = calendar.startOfDay(for: group.day)
-            tasksByDay[day] = group.tasks
-        }
-
-        let tomorrow = calendar.startOfDay(for: DueDate.dayOffset(1))
-        guard let endExclusive = calendar.date(byAdding: .day, value: 7, to: tomorrow) else {
-            groups = []
-            return
-        }
-
-        var occByDay: [Date: [ScheduleOccurrence]] = [:]
-        var day = tomorrow
-        while day < endExclusive {
-            let occ = (try? database.schedules.occurrences(forDay: day, calendar: calendar)) ?? []
-            if !occ.isEmpty {
-                occByDay[day] = occ
+            Group {
+                switch pane {
+                case .day:
+                    DayGanttView()
+                case .week:
+                    TimetableView(embedsNavigationStack: false, showsNavigationTitle: false)
+                case .month:
+                    MonthCalendarView()
+                }
             }
-            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
-            day = next
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-
-        var result: [UpcomingDayGroup] = []
-        day = tomorrow
-        while day < endExclusive {
-            let tasks = tasksByDay[day] ?? []
-            let occurrences = occByDay[day] ?? []
-            if !tasks.isEmpty || !occurrences.isEmpty {
-                result.append(UpcomingDayGroup(day: day, occurrences: occurrences, tasks: tasks))
+        .background(theme.canvas.ignoresSafeArea())
+        .environment(\.calendar, AppCalendar.gregorian)
+        .environment(\.locale, AppCalendar.locale)
+        .navigationTitle("Calendar")
+        .task { pane = .stored }
+        .onChange(of: pane) { _, newValue in
+            UpcomingPane.stored = newValue
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .tickytackySelectUpcomingPane)) { note in
+            if let raw = note.object as? String, let next = UpcomingPane(rawValue: raw) {
+                pane = next
+            } else if let next = note.object as? UpcomingPane {
+                pane = next
+            } else if let raw = note.object as? String, raw == "agenda" {
+                pane = .week
             }
-            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
-            day = next
         }
-        groups = result
     }
+}
 
-    private func toggle(_ task: TaskRecord) {
-        _ = try? database.tasks.setCompleted(id: task.id, completed: !task.isCompleted)
-        reload()
-    }
-
-    private func softDeleteTasks(in group: UpcomingDayGroup, at offsets: IndexSet) {
-        for index in offsets {
-            let id = group.tasks[index].id
-            try? database.tasks.softDelete(id: id)
-        }
-        selectedTaskIds = []
-        reload()
-    }
-
-    private func softDeleteTasks(_ ids: Set<String>) {
-        let taskIds = Set(groups.flatMap(\.tasks).map(\.id))
-        for id in ids where taskIds.contains(id) {
-            try? database.tasks.softDelete(id: id)
-        }
-        selectedTaskIds = []
-        reload()
-    }
+extension Notification.Name {
+    static let tickytackySelectUpcomingPane = Notification.Name("tickytackySelectUpcomingPane")
 }

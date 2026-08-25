@@ -7,12 +7,7 @@ struct ScheduleOccurrenceRow: View {
 
     private var swatch: PastelSwatch { PastelSwatch.resolve(occurrence.color) }
 
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.timeStyle = .short
-        f.dateStyle = .none
-        return f
-    }()
+    private static let timeFormatter = AppCalendar.timeShort
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {

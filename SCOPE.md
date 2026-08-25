@@ -46,8 +46,10 @@ A fast, dense personal productivity app in the spirit of TickTick — tasks, pla
 - [ ] Task title, notes/description
 - [ ] Due date (and optional due time)
 - [ ] Priority levels
-- [ ] Subtasks / checklist items
-- [ ] Lists (or projects/folders)
+- [x] Subtasks / checklist items
+- [x] Grocery checklist lists (name keyword) + task-title nudge
+- [x] Lists (or projects/folders)
+- [x] Soft list subheadings via **Group by tag** (classes as tags)
 - [ ] Tags
 - [ ] Search
 - [ ] Today view (includes overdue)
@@ -90,21 +92,30 @@ First-class **timetable** blocks — not just task due dates.
 
 ### P1 — Daily driver (post-MVP)
 
-- [ ] Calendar views with tasks + timetable
+**Ordered (2026-08-25):**
+
+1. **Pomodoro / Focus** (chosen over habits for Phase M)
+2. **Full dogfooding** (real-week use; finish remaining MVP manual checks)
+3. Then, as a batch:
+   - [ ] Theme picker (additional token packs)
+   - [ ] Calendar views with tasks + timetable — **prefer merging into Upcoming** (toggle / hybrid) over a new root tab; decide after dogfood
+   - [ ] Optional NL quick add
+   - [ ] Eisenhower matrix
+4. After that batch: **consider** widgets + App Intents
+
+Also in P1 when capacity allows (not sequenced above):
 - [ ] Richer recurrence (custom weekdays, end conditions)
-- [ ] Filters; optional NL quick add
+- [ ] Filters
 - [ ] Multiple timetables; conflict highlighting; drag blocks on iPad/Mac
-- [ ] Habits **or** Pomodoro (pick one)
-- [ ] Widgets + App Intents
 - [ ] iPad/Mac polish
-- [ ] Theme picker (additional token packs)
 
 ---
 
 ### P2 — Expansion
 
-- [ ] Kanban, Eisenhower matrix
-- [ ] Full habits + focus if not both done
+- [ ] Habits (if still wanted after Focus)
+- [ ] Kanban
+- [ ] Widgets + App Intents (if not done after the P1 batch)
 - [ ] Attachments, analytics
 - [ ] Collaboration / shared lists
 - [ ] Android app, web app
@@ -134,22 +145,24 @@ Prefer Tickytacky over TickTick / Reminders for day-to-day planning.
 
 ## Suggested build order
 
-1. App shell + Notebook tokens + Supabase project/schema
-2. Task model + lists + Today (local cache)
-3. Due dates, priorities, tags, search
-4. Basic recurrence
-5. Timetable + weekly view
-6. Combined Today
-7. Supabase auth + sync
-8. Notifications
-9. Calendar + widgets (P1)
-10. iPad/Mac polish; themes picker; habits or focus
+1. App shell + Notebook tokens + Supabase project/schema *(done)*
+2. Task model + lists + Today (local cache) *(done)*
+3. Due dates, priorities, tags, search *(done)*
+4. Basic recurrence *(done)*
+5. Timetable + weekly view *(done)*
+6. Combined Today *(done)*
+7. Supabase auth + sync *(done locally; Sign in with Apple needs Apple Developer)*
+8. Notifications *(done; G8 device fire in dogfood)*
+9. **Pomodoro / Focus**
+10. **Full dogfood**
+11. Theme picker + calendar views + NL quick-add + Eisenhower matrix
+12. Consider widgets (+ App Intents); then polish / P2 as needed
 
 ---
 
 ## Open decisions
 
-_Mostly locked — see [`MEM.md`](MEM.md)._ Remaining non-blocking: exact Xcode multiplatform packaging, push pipeline details.
+_Mostly locked — see [`MEM.md`](MEM.md)._ Remaining non-blocking: push pipeline details; whether widgets ship after the P1 batch.
 
 ---
 
@@ -158,5 +171,5 @@ _Mostly locked — see [`MEM.md`](MEM.md)._ Remaining non-blocking: exact Xcode 
 | Tier | Intent |
 |------|--------|
 | **P0 MVP** | Tasks + lists + recurrence + **timetable** + Supabase sync + reminders + Notebook UI |
-| **P1** | Calendar, themes picker, widgets, polish, habits *or* focus |
-| **P2** | Boards, collab, Android/web, Watch, extras |
+| **P1** | Pomodoro → dogfood → theme + calendar + NL + Eisenhower → *then consider* widgets |
+| **P2** | Habits (optional), Kanban, collab, Android/web, Watch, extras |

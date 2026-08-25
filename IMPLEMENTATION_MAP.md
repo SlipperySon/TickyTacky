@@ -53,14 +53,14 @@ Use checkboxes to track progress. Prefer finishing an entire **phase** before st
 | D7 | Auth | Sign in with Apple via Supabase Auth | Locked |
 | D8 | Min OS | iOS 18 / iPadOS 18 / macOS 15 | Locked |
 | D9 | Product name / bundle | **Tickytacky** / `app.tickytacky.ios` | Locked |
-| D10 | Habit vs Pomodoro (P1) | Defer until after MVP | Open |
+| D10 | Habit vs Pomodoro (P1) | **Pomodoro / Focus first**; habits deferred | Locked |
 | D11 | Design theme | Classic Notebook; theme picker later | Locked |
 | D12 | Soft-delete | Yes | Locked |
 | D13 | Conflicts | Last-write-wins per record | Locked |
 | D14 | Overdue in Today | Yes | Locked |
 
 ### Output of this section
-- [x] D1–D9, D11–D14 locked (see also `MEM.md`)
+- [x] D1–D14 locked (see also `MEM.md`)
 - [x] Product name + bundle ID chosen
 - [ ] Git repo initialized (if not already)
 - [ ] This map kept in sync with `MEM.md` / `SCOPE.md`
@@ -359,30 +359,38 @@ One-off skip/move for a generated occurrence.
 
 ## 5. Navigation & screen map
 
-### 5.1 Information architecture (iPhone P0)
+### 5.1 Information architecture (iPhone)
+
+**Locked 2026-08-25:** four root tabs.
 
 ```text
 Tab / root
 ├── Today
-├── Upcoming
-├── Browse (Lists + Tags)
-├── Timetable
+│   ├── Day (default)
+│   └── Lists (+ Tags) — browse lives here
+├── Calendar
+│   ├── Week (strip + day list)
+│   ├── Day (hour Gantt bars)
+│   └── Month (grid + day detail)
+├── Focus
 └── Settings
-(+ global Search, + Quick Add FAB/button)
 ```
 
-`DECISION`: 4 tabs vs sidebar-first on iPhone. Recommended: tabs on iPhone; sidebar on iPad/Mac.
+iPad/Mac sidebar: Today, Calendar, Search, Focus, Settings.
+
+`DECISION` (Phase J): further calendar UI prefers merging into Upcoming Week/Agenda — already the host tab.
 
 ### 5.2 Screens — P0
 
 #### App shell
 - [ ] Root scene + `ModelContainer` injection
-- [ ] TabView (iPhone)
+- [x] TabView (iPhone) — Browse / Upcoming / Focus / Settings
 - [ ] First-launch onboarding lite: create Inbox, optional sample data, notification permission prompt timing (`DECISION`: ask after first reminder set)
 - [ ] Settings screen shell
 
 #### Today
 - [x] Sections: Overdue (if any), Schedule (today’s blocks), Tasks due today, Maybe “No due date” omitted
+- [x] Hosted as Browse → Today pane (not a root tab)
 - [x] Tap task → Task Detail
 - [x] Tap schedule block → Block Detail / occurrence actions
 - [ ] Complete checkbox
@@ -390,15 +398,26 @@ Tab / root
 - [ ] Pull to refresh not required for local DB; refresh on appear OK
 
 #### Upcoming
-- [ ] Group by day for next 7 / 14 / 30 (`DECISION`: default 7)
-- [ ] Show tasks with due dates + optional schedule blocks per day
+- [x] Group by day for next 7 / 14 / 30 (`DECISION`: default 7)
+- [x] Show tasks with due dates + optional schedule blocks per day
+- [x] Week pane embeds timetable (replaces Timetable root tab)
 - [ ] Jump to date (P1)
+- [ ] P1 calendar: **host for calendar UI** (Agenda + Week already; avoid a new root Calendar tab — see Phase J)
 
-#### Lists
-- [ ] List of lists with counts
-- [ ] List detail = filtered task list
+#### Lists / Browse
+- [x] Lists + Tags under Browse → Lists
+- [x] List of lists with counts
+- [x] List detail = filtered task list
 - [ ] Create/edit list sheet
 - [ ] Inbox special-casing
+
+#### Timetable
+- [x] Week strip + day agenda (embedded in Upcoming → Week)
+- [ ] Active schedule picker if multiple (P1; MVP single schedule OK)
+- [ ] Weekly grid (hours × days) (`RISK` layout performance) — P1/polish; agenda-by-day is current default
+- [ ] Create/edit/delete schedule blocks
+- [ ] Exception: skip / reschedule occurrence
+- [ ] Color from swatch set
 
 #### Task list shared UI
 - [ ] `TaskRow`: checkbox, title, due, priority, list/tag hints
@@ -430,30 +449,26 @@ Tab / root
 - [ ] Search field + results list
 - [ ] Recent searches optional
 
-#### Timetable
-- [ ] Weekly grid (hours × days) (`RISK` layout performance)
-- [ ] Day strip + selected day agenda fallback for small phones (`DECISION`)
-- [ ] Create block sheet (title, weekday, start, end, color, reminder)
-- [ ] Edit block
-- [ ] Exception: skip this occurrence / reschedule this occurrence
-- [ ] Active schedule picker if multiple (P1; MVP single schedule OK)
-- [ ] Empty state: “Add your weekly classes or routines”
-
 #### Settings (P0)
+- [ ] Account / Sign in with Apple
+- [ ] Sync status
+- [ ] Focus durations
+- [ ] Notifications
 - [ ] Default list
 - [ ] Notification permission status + deep link to system settings
 - [ ] Week starts on (Sunday/Monday) (`DECISION`)
 - [ ] Time format follow system
 - [ ] Supabase sync status / troubleshoot blurb
 - [ ] App version
+- [ ] About
 - [ ] Debug: reset local store (DEBUG only)
 
 ### 5.3 Screens — P1
-- [ ] Calendar month/week/day
+- [ ] Calendar month/week/day (prefer Upcoming panes; no new root tab)
 - [ ] Filters sheet
 - [ ] Multiple timetables manager
 - [ ] Drag-resize blocks
-- [ ] Habits **or** Focus timer flows
+- [ ] Focus / Pomodoro timer flows (Phase M; habits deferred)
 - [ ] Widget configuration
 - [ ] Keyboard shortcut cheatsheet (Mac)
 
@@ -661,22 +676,29 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 
 ---
 
-### Phase J — P1 Calendar & richer planning
-- [ ] J1. Month calendar with badges
-- [ ] J2. Week/day calendar integrating tasks + timetable
-- [ ] J3. Richer recurrence (custom weekdays, end conditions)
-- [ ] J4. Filters (list/tag/priority/scheduled)
-- [ ] J5. Optional NL quick add
-- [ ] J6. Multiple timetables + active switching
-- [ ] J7. Conflict highlighting
-- [ ] J8. Drag move/resize on iPad/Mac
+### Phase J — P1 planning surfaces (after dogfood)
+Ordered after Phase M + full dogfood. Do as a batch (order within batch flexible):
+
+- [ ] J1. Theme picker (additional token packs; `ThemeTokens` already exists)
+- [ ] J2. Month calendar with badges
+- [ ] J3. Week/day calendar integrating tasks + timetable
+  - **DECISION (open):** Prefer **merging calendar into the existing Upcoming tab** (e.g. list + week/month toggle, or calendar header above the next-N-days list) instead of a fifth top-level tab — avoid IA bloat; validate in dogfood before committing to a separate Calendar tab
+- [ ] J4. Optional NL quick add
+- [ ] J5. Eisenhower matrix
+- [ ] J6. Richer recurrence (custom weekdays, end conditions) — if capacity
+- [ ] J7. Filters (list/tag/priority/scheduled) — if capacity
+- [ ] J8. Multiple timetables + active switching — later polish
+- [ ] J9. Conflict highlighting / drag on iPad/Mac — later polish
 
 #### Exit criteria
-- [ ] Calendar is a primary planning surface, not a toy
+- [ ] Calendar + theme + NL + matrix feel like a daily-driver upgrade, not toys
+- [ ] Calendar IA decided: Upcoming merge **or** separate tab — documented after dogfood
 
 ---
 
-### Phase K — P1 Apple integrations
+### Phase K — Widgets + App Intents (**consider after J**)
+Do **not** start until the J batch has been dogfooded. Revisit whether widgets are worth it.
+
 - [ ] K1. Shared App Group store access for widgets
 - [ ] K2. Home Screen widget: Today tasks
 - [ ] K3. Widget: next timetable block
@@ -686,7 +708,7 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 - [ ] K7. Lock Screen widgets if feasible
 
 #### Exit criteria
-- [ ] Widget updates after task changes (timeline reload strategy working)
+- [ ] Widget updates after task changes (timeline reload strategy working) — *if* K is undertaken
 
 ---
 
@@ -700,33 +722,34 @@ Each phase has **exit criteria**. Do not call a phase done until exit criteria p
 
 ---
 
-### Phase M — P1 habits **or** focus (choose one)
-#### If Habits
-- [ ] M-H1. Habit model + schedule linkage optional
-- [ ] M-H2. Check-in UI
-- [ ] M-H3. Streaks
-- [ ] M-H4. Habit on Today
+### Phase M — Focus / Pomodoro (**next after MVP code**)
+**Chosen:** Focus / Pomodoro (D10 locked). Habits deferred to N.
 
-#### If Focus / Pomodoro
-- [ ] M-F1. Focus session model
-- [ ] M-F2. Timer UI
-- [ ] M-F3. Link session to task
-- [ ] M-F4. Live Activity optional stretch
+- [x] M-F1. Focus session model
+- [x] M-F2. Timer UI (Notebook vibe)
+- [x] M-F3. Link session to task
+- [x] M-F4. Session-end notification
+- [ ] M-F5. Live Activity optional stretch
 
 #### Exit criteria
-- [ ] Chosen feature used in real week of dogfooding
+- [ ] Pomodoro usable in daily planning; then start **full dogfood**
+
+#### After M — Full dogfood gate
+- [ ] Real-week use as primary planner
+- [ ] Finish remaining MVP manual checks (Sign in with Apple, two-device sync, G8 device fire, TestFlight if desired)
+- [ ] Only then start Phase J
 
 ---
 
-### Phase N — P2 expansion (only after daily driver)
+### Phase N — P2 expansion (only after daily driver / J batch)
+- [ ] Habits (if still wanted)
 - [ ] Kanban
-- [ ] Eisenhower matrix
-- [ ] The other of habits/focus
 - [ ] Attachments
 - [ ] Collaboration architecture spike (Supabase already supports; design sharing later)
 - [ ] EventKit sync spike (`RISK` — often more pain than value)
 - [ ] Apple Watch app
 - [ ] Advanced analytics
+- [ ] Widgets if skipped in K
 
 ---
 
@@ -815,15 +838,18 @@ A Foundation (Tickytacky + Notebook + GRDB + Supabase stub)
            └── F Combined Today <────┘
                 ├── G Notifications
                 └── H Supabase Auth + Sync
-                     └── I MVP Hardening  → MVP SHIP
-                          ├── J Calendar
-                          ├── K Widgets/Intents
-                          ├── L Platform polish
-                          └── M Habits|Focus
-                               └── N P2 features (Android/web, etc.)
+                     └── I MVP Hardening  → MVP SHIP (code)
+                          └── M Pomodoro / Focus
+                               └── Full dogfood gate
+                                    └── J Theme + Calendar + NL + Eisenhower
+                                         ├── K Widgets (consider)
+                                         ├── L Platform polish
+                                         └── N P2 (habits, Kanban, …)
 ```
 
 **Critical path to MVP:** A → B → (D and E in parallel after B) → F → G → H → I
+
+**Post-MVP (locked 2026-08-25):** M → dogfood → J → (consider K) → L/N as needed
 
 ---
 
@@ -855,17 +881,18 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 | 5 | **F** | Combined Today (tasks + timetable slots) | P0 | D + E | — |
 | 6a | **G** | Notifications | P0 | F | **H** (after F) |
 | 6b | **H** | Supabase auth + sync | P0 | F | **G** |
-| 7 | **I** | MVP hardening + dogfood | P0 | G + H | — |
-| — | **MVP SHIP** | Gate: `SCOPE.md` MVP success criteria | P0 | I | — |
-| 8 | **J** | Calendar + richer planning + multi-timetable | P1 | MVP SHIP | — |
-| 9a | **K** | Widgets + App Intents | P1 | MVP SHIP (stable store) | **L** |
-| 9b | **L** | iPad / Mac polish | P1 | MVP SHIP | **K** |
-| 10 | **M** | Habits **or** Focus (pick one) | P1 | J recommended; else after MVP | Late L |
-| — | **Daily driver** | Gate: prefer this app over TickTick/Reminders | P1 | J + (K or L) + M | — |
-| 11+ | **N** | Kanban, matrix, Watch, collab, EventKit, etc. | P2 | Daily driver | Among themselves as desired |
+| 7 | **I** | MVP hardening + dogfood prep | P0 | G + H | — |
+| — | **MVP SHIP** | Gate: code ready; manual checks fold into post-M dogfood | P0 | I | — |
+| 8 | **M** | **Pomodoro / Focus** | P1 | MVP SHIP | — |
+| — | **Full dogfood** | Real-week use + remaining MVP manual checks | P1 | M | — |
+| 9 | **J** | Theme picker + calendar + NL quick-add + Eisenhower | P1 | Full dogfood | — |
+| 10 | **K** | Widgets + App Intents (**consider**) | P1 | J dogfooded | Optional |
+| 11 | **L** | iPad / Mac polish | P1 | After J (flexible) | — |
+| — | **Daily driver** | Gate: prefer this app over TickTick/Reminders | P1 | M + dogfood + J | — |
+| 12+ | **N** | Habits, Kanban, Watch, collab, EventKit, etc. | P2 | Daily driver | Among themselves as desired |
 
 **Critical path (strict order):**  
-`Dec → A → B → (D ∥ E) → F → (G ∥ H) → I → MVP SHIP → J → (K ∥ L) → M → Daily driver → N`
+`Dec → A → B → (D ∥ E) → F → (G ∥ H) → I → MVP SHIP → M → dogfood → J → (consider K) → Daily driver → N`
 
 ### 11.3 Milestone order (priority gates, not dates)
 
@@ -879,14 +906,15 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 | M5 | Real weekly timetable encodable | P0 | Phase E exit criteria |
 | M6 | Today shows tasks + slots | P0 | Phase F exit criteria |
 | M7 | Reminders trusted on device | P0 | Phase G exit criteria |
-| M8 | Two devices sync | P0 | Phase H exit criteria |
-| **M9** | **MVP SHIP** | **P0** | Phase I + MVP success criteria |
-| M10 | Calendar is a real planning surface | P1 | Phase J exit criteria |
-| M11 | Widgets / Shortcuts useful | P1 | Phase K exit criteria |
-| M12 | iPad/Mac feel native | P1 | Phase L exit criteria |
-| M13 | Habits or Focus in daily use | P1 | Phase M exit criteria |
-| **M14** | **Daily driver** | **P1** | P1 success criteria in `SCOPE.md` |
-| M15+ | Expansion | P2 | Phase N items individually |
+| M8 | Two devices sync | P0 | Phase H exit criteria (may complete during dogfood) |
+| **M9** | **MVP SHIP (code)** | **P0** | Phase I code complete |
+| M10 | Pomodoro in daily use | P1 | Phase M exit criteria |
+| **M11** | **Full dogfood** | **P1** | Real-week use + remaining manual MVP checks |
+| M12 | Theme + calendar + NL + Eisenhower | P1 | Phase J exit criteria |
+| M13 | Widgets useful (optional) | P1 | Phase K if undertaken |
+| M14 | iPad/Mac feel native | P1 | Phase L exit criteria |
+| **M15** | **Daily driver** | **P1** | P1 success criteria in `SCOPE.md` |
+| M16+ | Expansion | P2 | Phase N items individually |
 
 ### 11.4 What may run in parallel
 
@@ -894,20 +922,21 @@ Within a priority band, follow **sequence order** (lower number first). Items wi
 |--------------|-----------|---------------------|
 | D ∥ E | Phase B core CRUD works | Do not start either before B |
 | G ∥ H | Phase F combined Today works | Do not enable multi-device sync until models stable from F |
-| K ∥ L | MVP shipped | Shared store must be stable for widgets |
+| Items inside J | After full dogfood | Theme / calendar / NL / matrix can interleave |
+| L with late J | J core done | Shared UX must stay coherent |
 | P2 items | Daily driver achieved | Never parallel with unfinished P0 |
 
 ### 11.5 What must never jump the queue
 
 | Temptation | Priority | Do this instead |
 |------------|----------|-----------------|
-| Widgets before sync | P1 before P0 | Finish H + I first |
-| Habits/Pomodoro before timetable | P1/P2 before P0 | Finish E + F first |
-| Kanban / matrix early | P2 | Park in N |
+| Widgets before Pomodoro + dogfood + J | P1 before locked order | Finish M → dogfood → J first; then *consider* K |
+| Habits before Pomodoro | Locked Focus first | Habits only in N if still wanted |
+| Calendar/NL/Eisenhower before dogfood | P1 before dogfood | Ship M, dogfood, then J |
+| Kanban early | P2 | Park in N |
 | Full Supabase sync on day one | P0 but late sequence | Local B–F first, then H |
 | Mac polish before iPhone Today works | P1 before P0 | Sequence L after MVP |
-| Natural-language quick add | P1 | After MVP; optional in J |
-| Theme picker before MVP | P1 | Notebook only until M9 |
+| Theme picker before MVP | P1 | Notebook only until M9; theme in J |
 | Android/web before Apple MVP | P2 | Same API later |
 
 ### 11.6 Relative weight (not time)
@@ -932,10 +961,10 @@ Use only to decide **attention**, not schedules. Higher weight ⇒ expect more c
 | G | Notifications | P0 | W3 |
 | H | Supabase sync | P0 | W3 |
 | I | Hardening | P0 | W2 |
-| J | Calendar P1 | P1 | W3 |
-| K | Widgets/Intents | P1 | W2 |
+| J | Theme/Calendar/NL/Eisenhower | P1 | W2–W3 |
+| K | Widgets/Intents (optional) | P1 | W2 |
 | L | Platform polish | P1 | W2 |
-| M | Habits\|Focus | P1 | W2 |
+| M | Pomodoro / Focus | P1 | W2 |
 | N | P2 bag | P2 | W3 (varies) |
 
 ### 11.7 Checkpoint reviews (by sequence, not calendar)
@@ -945,8 +974,10 @@ Use only to decide **attention**, not schedules. Higher weight ⇒ expect more c
 | B | Would I enter real tasks here? | Fix UX before starting D/E |
 | E | Can I encode my real weekly timetable? | Simplify to day-agenda before fancy grid |
 | H | Do two devices stay consistent through normal use? | Do not call MVP done; stay on H |
-| I | Still reaching for TickTick for basics? | Log top blockers; fix before M9 |
-| M | Is this my default planner? | Stay on P1; do not start N |
+| I | Still reaching for TickTick for basics? | Log top blockers; fix before calling code-shipped |
+| M | Is Pomodoro actually used? | Fix timer UX before full dogfood / J |
+| Dogfood | Prefer Tickytacky for a real week? | Stay fixing; do not start J |
+| J | Daily-driver upgrade landed? | Stay on J; do not start K/N |
 
 ### 11.8 Scope-creep risks (priority discipline)
 

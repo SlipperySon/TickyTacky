@@ -7,10 +7,10 @@ struct TodayView: View {
 
     /// When false, parent (e.g. iPad/Mac split detail) already provides NavigationStack.
     var embedsNavigationStack: Bool = true
+    /// When false, parent owns the navigation title (e.g. Browse → Today pane).
+    var showsNavigationTitle: Bool = true
 
     @State private var snapshot = TodaySnapshot(overdue: [], schedule: [], dueToday: [])
-    @State private var inboxId: String?
-    @State private var showQuickAdd = false
     @State private var selectedOccurrence: ScheduleOccurrence?
     @State private var selectedTaskIds: Set<String> = []
 
@@ -25,31 +25,20 @@ struct TodayView: View {
     }
 
     private var root: some View {
-        ZStack(alignment: .bottomTrailing) {
-            theme.canvas.ignoresSafeArea()
-            HStack(spacing: 0) {
-                theme.canvasRuled
-                    .frame(width: 14)
-                    .ignoresSafeArea()
-                content
-            }
-            QuickAddButton { showQuickAdd = true }
-                .padding(20)
+        HStack(spacing: 0) {
+            theme.canvasRuled
+                .frame(width: 14)
+            content
         }
-        .navigationTitle("Today")
-        .sheet(isPresented: $showQuickAdd) {
-            QuickAddSheet(
-                defaultListId: inboxId,
-                defaultDueDate: DueDate.today()
-            ) { reload() }
-        }
+        .background(theme.canvas)
+        .modifier(OptionalNavigationTitle(title: "Today", enabled: showsNavigationTitle))
         .sheet(item: $selectedOccurrence) { occurrence in
             OccurrenceActionsSheet(occurrence: occurrence) { reload() }
         }
         .task { reload() }
         .onAppear { reload() }
-        .onChange(of: showQuickAdd) { _, open in
-            if !open { reload() }
+        .onReceive(NotificationCenter.default.publisher(for: .tickytackyContentDidChange)) { _ in
+            reload()
         }
         .onTaskListDeleteCommand(selection: selectedTaskIds) { ids in
             softDeleteTasks(ids)
@@ -145,7 +134,6 @@ struct TodayView: View {
     }
 
     private func reload() {
-        inboxId = try? database.fetchInbox()?.id
         let taskBundle = try? database.tasks.fetchToday()
         let occurrences = (try? database.schedules.occurrences(forDay: Date(), calendar: calendar)) ?? []
         snapshot = TodayAssembler.assemble(

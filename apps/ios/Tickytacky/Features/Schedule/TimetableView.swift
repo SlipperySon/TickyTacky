@@ -6,6 +6,8 @@ struct TimetableView: View {
     @Environment(\.calendar) private var calendar
 
     var embedsNavigationStack: Bool = true
+    /// When false, parent owns the navigation title (e.g. Upcoming → Week pane).
+    var showsNavigationTitle: Bool = true
 
     @State private var weekStart: Date = Date()
     @State private var selectedDay: Date = Date()
@@ -18,23 +20,9 @@ struct TimetableView: View {
 
     private let theme = Theme.current
 
-    private static let dayFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "EEE"
-        return f
-    }()
-
-    private static let dayNumberFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "d"
-        return f
-    }()
-
-    private static let weekRangeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "MMM d"
-        return f
-    }()
+    private static let dayFormatter = AppCalendar.weekdayShort
+    private static let dayNumberFormatter = AppCalendar.dayOfMonth
+    private static let weekRangeFormatter = AppCalendar.dayMonth
 
     var body: some View {
         Group {
@@ -61,7 +49,7 @@ struct TimetableView: View {
                 }
             }
         }
-        .navigationTitle("Timetable")
+        .modifier(OptionalNavigationTitle(title: "Timetable", enabled: showsNavigationTitle))
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -103,6 +91,9 @@ struct TimetableView: View {
         .onChange(of: selectedDay) { _, _ in reloadDay() }
         .onChange(of: weekStart) { _, _ in
             clampSelectedDayToWeek()
+            reload()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .tickytackyContentDidChange)) { _ in
             reload()
         }
     }

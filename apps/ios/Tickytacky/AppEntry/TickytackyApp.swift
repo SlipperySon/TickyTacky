@@ -7,8 +7,14 @@ struct TickytackyApp: App {
     init() {
         ReminderScheduler.shared.configure()
         SyncEngine.shared.configure(database: database)
+        // Prefer tag subheadings; migrate older false default once.
+        if UserDefaults.standard.object(forKey: "list.groupByTag.defaulted") == nil {
+            UserDefaults.standard.set(true, forKey: "list.groupByTag")
+            UserDefaults.standard.set(true, forKey: "list.groupByTag.defaulted")
+        }
         #if DEBUG
         RecurrenceEngine.runSelfChecks()
+        DebugSampleSeeder.seedIfNeeded(database: database)
         #endif
     }
 
@@ -16,6 +22,8 @@ struct TickytackyApp: App {
         WindowGroup {
             RootTabView()
                 .environment(\.appDatabase, database)
+                .environment(\.calendar, AppCalendar.gregorian)
+                .environment(\.locale, AppCalendar.locale)
                 .preferredColorScheme(nil)
                 .onOpenURL { url in
                     if let link = ReminderDeepLink.parse(url: url) {

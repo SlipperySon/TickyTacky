@@ -53,6 +53,8 @@ struct TaskRow: View {
             parts.append("Overdue")
         }
         let formatter = DateFormatter()
+        formatter.locale = AppCalendar.locale
+        formatter.calendar = AppCalendar.gregorian
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
         parts.append(formatter.string(from: due))
@@ -60,11 +62,8 @@ struct TaskRow: View {
             var comps = DateComponents()
             comps.hour = hour
             comps.minute = minute
-            if let time = Calendar.current.date(from: comps) {
-                let tf = DateFormatter()
-                tf.dateStyle = .none
-                tf.timeStyle = .short
-                parts.append(tf.string(from: time))
+            if let time = AppCalendar.gregorian.date(from: comps) {
+                parts.append(AppCalendar.timeShort.string(from: time))
             }
         }
         return parts.joined(separator: " · ")

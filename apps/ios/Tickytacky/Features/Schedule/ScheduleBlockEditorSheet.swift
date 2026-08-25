@@ -26,15 +26,7 @@ struct ScheduleBlockEditorSheet: View {
     @State private var errorMessage: String?
 
     private let theme = Theme.current
-    private let weekdays: [(Int, String)] = [
-        (1, "Sunday"),
-        (2, "Monday"),
-        (3, "Tuesday"),
-        (4, "Wednesday"),
-        (5, "Thursday"),
-        (6, "Friday"),
-        (7, "Saturday")
-    ]
+    private let weekdays = AppCalendar.weekdaysMondayFirst
     private let reminderChoices = [5, 10, 15, 30, 60]
 
     var body: some View {
@@ -66,7 +58,7 @@ struct ScheduleBlockEditorSheet: View {
                         .foregroundStyle(theme.inkMuted)
                 }
 
-                Section("Color") {
+                Section("Colour") {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
                         ForEach(PastelSwatch.allCases) { swatch in
                             Button {

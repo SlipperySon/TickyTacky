@@ -73,6 +73,42 @@ final class TagService: @unchecked Sendable {
         }
     }
 
+    /// Tags keyed by task id for grouping list rows into soft subheadings.
+    func fetchTagsByTaskIds(_ taskIds: [String]) throws -> [String: [TagRecord]] {
+        guard !taskIds.isEmpty else { return [:] }
+        return try database.dbQueue.read { db in
+            let placeholders = Array(repeating: "?", count: taskIds.count).joined(separator: ",")
+            let rows = try Row.fetchAll(
+                db,
+                sql: """
+                SELECT tt.task_id AS task_id, g.*
+                FROM tags g
+                INNER JOIN task_tags tt ON tt.tag_id = g.id
+                WHERE tt.task_id IN (\(placeholders))
+                  AND g.deleted_at IS NULL
+                ORDER BY g.name COLLATE NOCASE ASC
+                """,
+                arguments: StatementArguments(taskIds)
+            )
+            var map: [String: [TagRecord]] = [:]
+            for row in rows {
+                let taskId: String = row["task_id"]
+                // Decode tag columns only (row also carries task_id).
+                let tag = TagRecord(
+                    id: row["id"],
+                    name: row["name"],
+                    color: row["color"],
+                    createdAt: row["created_at"],
+                    updatedAt: row["updated_at"],
+                    deletedAt: row["deleted_at"],
+                    syncedAt: row["synced_at"]
+                )
+                map[taskId, default: []].append(tag)
+            }
+            return map
+        }
+    }
+
     /// Non-deleted tasks for a tag, canonical sort (completed last).
     func fetchTasks(tagId: String, includeCompleted: Bool = true) throws -> [TaskRecord] {
         try database.dbQueue.read { db in

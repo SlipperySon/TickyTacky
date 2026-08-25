@@ -29,9 +29,18 @@ struct TaskDetailView: View {
     @State private var recurrenceInterval = 1
     @State private var hasReminder = false
     @State private var reminderOffsetMinutes = 15
+    @State private var groceryNudgeDismissed = false
 
     private let theme = Theme.current
     private let reminderChoices = [0, 5, 15, 30, 60, 120, 1440]
+
+    private var showsGroceryNudge: Bool {
+        guard loaded, !groceryNudgeDismissed else { return false }
+        guard GroceryMode.titleSuggestsGrocery(title) else { return false }
+        let currentIsGrocery = lists.first(where: { $0.id == listId })
+            .map { GroceryMode.isGroceryListName($0.name) } ?? false
+        return !currentIsGrocery
+    }
 
     var body: some View {
         Group {
@@ -54,6 +63,47 @@ struct TaskDetailView: View {
                             .onChange(of: isCompleted) { _, newValue in
                                 applyCompletion(newValue)
                             }
+                    }
+
+                    if showsGroceryNudge {
+                        Section {
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "cart")
+                                    .foregroundStyle(theme.accent)
+                                    .padding(.top, 2)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Move to Groceries?")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(theme.ink)
+                                    Text("Titles that mention grocery work best on a shopping checklist.")
+                                        .font(.footnote)
+                                        .foregroundStyle(theme.inkMuted)
+                                    HStack(spacing: 16) {
+                                        Button("Move") { moveToGroceryList() }
+                                            .tint(theme.accent)
+                                        Button("Not now") { groceryNudgeDismissed = true }
+                                            .foregroundStyle(theme.inkMuted)
+                                    }
+                                    .padding(.top, 2)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                        }
+                        .listRowBackground(theme.accent.opacity(0.08))
+                    }
+
+                    Section("Focus") {
+                        Button {
+                            NotificationCenter.default.post(
+                                name: .tickytackyOpenFocus,
+                                object: taskId
+                            )
+                            dismiss()
+                        } label: {
+                            Label("Start Focus", systemImage: "timer")
+                        }
+                        .tint(theme.accent)
+                        .disabled(isCompleted)
                     }
 
                     Section("List") {
@@ -393,6 +443,19 @@ struct TaskDetailView: View {
         } catch {
             errorMessage = error.localizedDescription
             isCompleted = !completed
+        }
+    }
+
+    private func moveToGroceryList() {
+        do {
+            let grocery = try GroceryMode.ensureGroceryList(database: database)
+            listId = grocery.id
+            lists = try database.lists.fetchAll()
+            groceryNudgeDismissed = true
+            persist()
+            NotificationCenter.default.post(name: .tickytackyContentDidChange, object: nil)
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 

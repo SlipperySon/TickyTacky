@@ -84,6 +84,7 @@ final class AppDatabase: @unchecked Sendable {
             try db.execute(sql: "DELETE FROM schedules")
             try db.execute(sql: "DELETE FROM task_tags")
             try db.execute(sql: "DELETE FROM subtasks")
+            try db.execute(sql: "DELETE FROM focus_sessions")
             try db.execute(sql: "DELETE FROM tasks")
             try db.execute(sql: "DELETE FROM tags")
             try db.execute(sql: "DELETE FROM lists")
@@ -91,6 +92,9 @@ final class AppDatabase: @unchecked Sendable {
         }
         try seedInboxIfNeeded()
         _ = try schedules.ensureDefaultSchedule()
+        #if DEBUG
+        UserDefaults.standard.removeObject(forKey: "debug.sampleDataVersion")
+        #endif
     }
 
     func fetchInbox() throws -> TaskListRecord? {
@@ -106,4 +110,5 @@ final class AppDatabase: @unchecked Sendable {
     var tags: TagService { TagService(database: self) }
     var search: SearchService { SearchService(database: self) }
     var schedules: ScheduleService { ScheduleService(database: self) }
+    var focus: FocusService { FocusService(database: self) }
 }

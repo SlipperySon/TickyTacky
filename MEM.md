@@ -43,7 +43,7 @@ Related docs:
 
 ### Design
 - **Classic Notebook** locked — beige paper, graphite, pastel sage + sky
-- Theme picker later; `ThemeTokens` API in code
+- Theme picker later (Phase J, after Pomodoro + dogfood); `ThemeTokens` API in code
 - See [`DESIGN.md`](DESIGN.md)
 
 ### Defaults locked
@@ -55,22 +55,32 @@ Related docs:
 | Soft-delete | Yes |
 | Conflicts | Last-write-wins per record |
 | Overdue | Show in Today |
-| iPhone nav | Tabs |
-| iPad/Mac nav | Sidebar |
+| iPhone nav | Tabs — Today / Calendar / Focus / Settings |
+| iPad/Mac nav | Sidebar (same + Search) |
 | Timetable complete | Does **not** complete a task |
 | Recurrence edit MVP | Series-only |
 | Overnight blocks | Not in MVP |
-| Week start | User setting (system-friendly default) |
+| Week start | **Monday** (Australian / ISO); UI locale `en_AU` |
+| Calendar panes | **Day → Week → Month** (default Day) |
+| Grocery lists | Name contains grocery/groceries → checklist UI; task title nudge otherwise |
+| List subheadings | **Tags as soft groups** (default Group by tag ON). Few lists (Life + Groceries); classes/projects = tags |
 
 ### Sequence position
-- **Now working on:** Manual MVP gate (Secrets, two-device sync, G8 device, TestFlight/dogfood)
-- **Done locally:** A–I code + ship-readiness sync/data fixes (UUID case, inbox reconcile, LWW dirty-local, account wipe, v8 id normalize)
-- **Cloud:** Apply `…00005` on remote before trusting LWW
-- Verdict: **ready for personal dogfood / internal TestFlight** after Secrets + signing; **not** App Store public until two-device + G8 pass
+- **Now working on:** **Full dogfood** (Pomodoro shipped locally)
+- **Done locally:** A–I + Phase **M** Focus / Pomodoro
+- **Still manual (MVP gate):** Sign in with Apple (needs paid Apple Developer), two-device sync smoke, G8 device fire — fold into full dogfood
+- Verdict: **shippable for local/personal use** with Focus timer; App Store / TestFlight wait on Apple Program + dogfood
+
+### Post-MVP roadmap (locked 2026-08-25)
+1. **Pomodoro / Focus** (Phase M — Focus path; habits deferred)
+2. **Full dogfooding** (real-week use + finish remaining MVP manual checks)
+3. **Theme picker** + **calendar views** (likely merged with **Upcoming**, not a new tab) + **NL quick-add** + **Eisenhower matrix**
+4. **Consider widgets** (+ App Intents) after that batch proves useful
 
 ### Open decisions (non-blocking)
 - [x] Mac vs iOS: native multiplatform target via XcodeGen (`supportedDestinations: [iOS, macOS]`)
 - [x] Local cache library: **GRDB**
+- [x] P1 focus feature: **Pomodoro / Focus** (not habits first)
 - [ ] Push: APNs via Supabase Edge / third-party later
 
 ### Explicit non-goals (for now)
@@ -85,9 +95,9 @@ Related docs:
 
 ## Active focus
 
-1. Wire Secrets + Sign in with Apple; apply remote `…00005`
-2. Two-device sync smoke + G8 physical reminder fire
-3. TestFlight + ~7-day dogfood (`apps/ios/MVP_HARDENING.md`)
+1. **Full dogfood** (incl. Apple Sign-In when enrolled, two-device sync, G8; exercise Focus)
+2. Then: theme picker → calendar views → NL quick-add → Eisenhower matrix
+3. After that batch: **consider widgets**
 
 ## Pre-start checklist
 
@@ -96,9 +106,10 @@ Related docs:
 - [x] App name: **Tickytacky**
 - [x] Defaults locked (table above)
 - [x] Docs aligned to API-first (this pass)
+- [x] Post-MVP order: Pomodoro → dogfood → theme/calendar/NL/Eisenhower → widgets later
 
 ### Defer
-- Theme picker, habits/Pomodoro, widgets, Kanban, collab, NL quick-add
+- Habits (after Focus, if ever), Kanban, collab, widgets until post–Eisenhower batch
 
 ---
 
@@ -126,6 +137,42 @@ Related docs:
 ## Log
 
 Newest first.
+
+### 2026-08-25 (AU calendar)
+- Calendar tab order **Day | Week | Month**; `AppCalendar` en_AU + Monday week start; day-before-month dates; Colour spelling in schedule editor
+
+### 2026-08-25 (few lists + tag groups)
+- Default **Group by tag** ON; `TagGrouping` prefers context tags over meta (Urgent/Waiting)
+- Sample data: **Life + Groceries** only (plus Inbox); Work/MATH101/HIST200 as tags
+- Browse: Tags first; Quick Add supports tags
+
+### 2026-08-25 (grocery + subheadings)
+- Grocery: list name keyword → checklist (multi-add, checked section); non-grocery task title → subtle Move to Groceries nudge
+- Subheadings: no section entities — use tags (MATH101…) under a few lists (University); List menu **Group by tag**
+
+### 2026-08-25 (day gantt)
+- Calendar tab: **Week | Day | Month**; Day = hour Gantt for timetable blocks (month timeline deferred)
+
+### 2026-08-25 (calendar week/month)
+- Dropped Agenda; Calendar tab is **Week | Month** (persists last choice)
+
+### 2026-08-25 (nav labels)
+- Root tabs: **Today** (Day | Lists), **Calendar** (Agenda | Calendar), Focus, Settings
+
+### 2026-08-25 (nav merge)
+- Root tabs: **Browse** (Today | Lists), **Upcoming** (Agenda | Week), **Focus**, **Settings**
+- Today + Timetable no longer separate tabs; Settings back on main bar
+
+### 2026-08-25 (Phase M Pomodoro)
+- Focus / Pomodoro: `v9_focus`, FocusEngine, Focus tab, Settings durations, task link + end notification
+- Next: full dogfood
+
+### 2026-08-25 (post-MVP roadmap)
+- Locked next build: **Pomodoro / Focus**, then **full dogfood**
+- After dogfood: theme picker, calendar views, NL quick-add, Eisenhower matrix
+- Calendar note: **potentially merge with Upcoming tab** (avoid extra root tab; open DECISION in Phase J)
+- Widgets: **consider later** (not next)
+- Habits deferred (Focus chosen for Phase M); SCOPE + IMPLEMENTATION_MAP synced
 
 ### 2026-08-20 (cloud storage compact)
 - Migration `20260819000006_storage_compact.sql`: drop unused cols, nullable recurrence, smallints, text caps, purge_soft_deleted()
