@@ -11,16 +11,29 @@ Personal planner — Apple-first, Supabase-backed, Classic Notebook design.
 
 ## Stack
 
-- **Clients:** SwiftUI (iPhone / iPad / Mac first; Android & web later)
+- **Clients:** SwiftUI Apple app first; separate Web / Android / Windows prototypes in `apps/`
 - **API:** Supabase (Postgres + Auth + Realtime)
-- **Local cache:** GRDB / SQLite
+- **Local cache:** GRDB / SQLite (Apple)
+
+## Apps
+
+| Path | What it is |
+|------|------------|
+| [`apps/ios/`](apps/ios/) | **Tickytacky** — iPhone, iPad, Mac (shipping client) |
+| [`apps/web/`](apps/web/) | **Tickytacky Web** — browser prototype |
+| [`apps/android/`](apps/android/) | **Tickytacky Android** — native Android prototype |
+| [`apps/windows/`](apps/windows/) | **Tickytacky Windows** — WPF prototype |
+
+See [`apps/README.md`](apps/README.md). Do not mix these trees; shared data later via Supabase.
 
 ## Build environments
 
 | Environment | Builds |
 |-------------|--------|
-| **Cloud** (Linux) | `supabase/` backend |
+| **Cloud** (Linux) | `supabase/` backend; `apps/web/` |
 | **Local** (macOS + Xcode) | `apps/ios/` SwiftUI client |
+| **Local** (Android Studio) | `apps/android/` |
+| **Local** (Windows + .NET 8) | `apps/windows/` |
 
 ## Status
 

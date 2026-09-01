@@ -24,15 +24,16 @@ Related docs:
 - **App name:** Tickytacky
 - **Bundle ID (working):** `app.tickytacky.ios` (Mac may share multiplatform ID — confirm in Xcode)
 - Apple-first TickTick-style planner: tasks + **recurring timetable**
-- Long-term clients: **iPhone, iPad, Mac**, then **Android + web**
+- Long-term clients: **iPhone, iPad, Mac**, plus **separate** Web / Android / Windows prototypes
 - MVP = daily planner (tasks, basic recurrence, timetable, sync, reminders)
+- Parallel shells (2026-09-01): Web / Android / Windows. Pairing is a **sync key** issued on Apple (Settings), not email. Calendar bridges out of scope.
 
 ### Architecture (locked for now)
 - **Canonical data:** Supabase (Postgres + Auth + Realtime)
 - Apple clients: SwiftUI + **local SQLite/GRDB cache** synced to Supabase
 - CloudKit: **not** used as database
 - Domain logic (recurrence, timetable occurrences) stays **pure / testable / portable**
-- Auth MVP: **Sign in with Apple** via Supabase Auth (email/Google later)
+- Auth MVP: **Sign in with Apple** on iOS; **email + password** on Web / Android / Windows until Apple is enabled on hosted
 
 ### Why Supabase (not PocketBase / Firebase)
 - Relational model fits lists/tasks/tags/schedules
@@ -42,8 +43,8 @@ Related docs:
 - Firebase: easier some mobile paths; weaker fit for relational timetable data
 
 ### Design
-- **Classic Notebook** locked — beige paper, graphite, pastel sage + sky
-- Theme picker later (Phase J, after Pomodoro + dogfood); `ThemeTokens` API in code
+- **Classic Notebook** locked in light — beige paper, graphite, pastel sage + sky
+- Dark appearance: **Notebook** (dimmed paper), **Morocco** (cocoa leather), or **Clothbound** (charcoal + kraft gilt). Settings → Dark appearance.
 - See [`DESIGN.md`](DESIGN.md)
 
 ### Defaults locked
@@ -176,6 +177,21 @@ Newest first.
 ### 2026-08-25 (nav merge)
 - Root tabs: **Browse** (Today | Lists), **Upcoming** (Agenda | Week), **Focus**, **Settings**
 - Today + Timetable no longer separate tabs; Settings back on main bar
+
+### 2026-09-01 (sync key)
+- Apple Settings issues `TTK-…` key; Edge Function `sync-key` + table `sync_keys`
+- Web/Android/Windows redeem the same key for a Supabase session
+- Hosted: migration applied, function deployed (`verify_jwt` off; custom key auth)
+
+### 2026-09-01 (hosted sync for non-Apple shells)
+- Hosted API `fgdmonniblfzapdpxfxc` healthy: REST + GoTrue; email on, Apple off, confirm-email on
+- MCP SQL blocked (DB password); dashboard: disable Confirm email and/or enable Apple
+- Web/Android/Windows: email login + Inbox/task pull-push (`apps/_shared`)
+
+### 2026-09-01 (parallel non-Apple shells)
+- Scaffolded **Tickytacky Web** (`apps/web`), **Tickytacky Android** (`apps/android`), **Tickytacky Windows** (`apps/windows`)
+- Did not change `apps/ios/` sources; index in `apps/README.md`
+- Sample Today UI only; sync / shared domain later
 
 ### 2026-08-25 (Phase M Pomodoro)
 - Focus / Pomodoro: `v9_focus`, FocusEngine, Focus tab, Settings durations, task link + end notification

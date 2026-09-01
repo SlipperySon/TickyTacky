@@ -1,5 +1,10 @@
 import AuthenticationServices
 import SwiftUI
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 struct SettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -23,6 +28,8 @@ struct SettingsView: View {
     @State private var googleSignedIn = GoogleCalendarPublisher.shared.isSignedIn
     @State private var googleStatusMessage: String?
     @State private var dualWriteEnabled = CalendarBridgeCoordinator.shared.isDualWriteEnabled
+    @State private var syncKeyDraft = ""
+    @State private var showSyncKeyCopied = false
     #if DEBUG
     @State private var sampleSeedMessage: String?
     #endif
@@ -84,13 +91,31 @@ struct SettingsView: View {
                     Text("Signed in")
                         .foregroundStyle(theme.inkMuted)
                 }
-                if let email = auth.userEmail, !email.isEmpty {
+                if let email = auth.userEmail, !email.isEmpty, !email.hasSuffix(".invalid") {
                     LabeledContent("Apple ID") {
                         Text(email)
                             .foregroundStyle(theme.inkMuted)
                             .lineLimit(1)
                     }
                 }
+                if let key = auth.lastIssuedSyncKey {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Sync key (copy now — it is not shown again)")
+                            .font(.footnote)
+                            .foregroundStyle(theme.inkMuted)
+                        Text(key)
+                            .font(.body.monospaced())
+                            .textSelection(.enabled)
+                        Button(showSyncKeyCopied ? "Copied" : "Copy sync key") {
+                            copyToPasteboard(key)
+                            showSyncKeyCopied = true
+                        }
+                    }
+                }
+                Button("Create sync key for other devices") {
+                    Task { await auth.issueSyncKey() }
+                }
+                .disabled(auth.isLoading)
                 Button("Sign Out", role: .destructive) {
                     Task { await auth.signOut() }
                 }
@@ -100,6 +125,20 @@ struct SettingsView: View {
                     Text("Signed out")
                         .foregroundStyle(theme.inkMuted)
                 }
+                Button("Create sync key") {
+                    Task { await auth.issueSyncKey() }
+                }
+                .disabled(auth.isLoading)
+                TextField("Paste sync key from iPhone", text: $syncKeyDraft)
+                    #if os(iOS)
+                    .textInputAutocapitalization(.characters)
+                    #endif
+                    .autocorrectionDisabled()
+                    .font(.body.monospaced())
+                Button("Use this sync key") {
+                    Task { await auth.redeemSyncKey(syncKeyDraft) }
+                }
+                .disabled(auth.isLoading || syncKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 SignInWithAppleButton(.signIn) { request in
                     auth.prepareAppleSignInRequest(request)
                 } onCompletion: { result in
@@ -110,7 +149,7 @@ struct SettingsView: View {
                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                 .disabled(auth.isLoading || !supabase.isConfigured)
 
-                Text("Sign in is required to sync across devices. Local tasks, lists, and timetable work offline without an account.")
+                Text("Create a sync key on this device, then paste it on Web, Android, or Windows. Local data still works without an account. Sign in with Apple is optional.")
                     .font(.footnote)
                     .foregroundStyle(theme.inkMuted)
             }
@@ -542,5 +581,14 @@ struct SettingsView: View {
         googleConfigured = GoogleCalendarPublisher.shared.isConfigured
         googleSignedIn = GoogleCalendarPublisher.shared.isSignedIn
         dualWriteEnabled = CalendarBridgeCoordinator.shared.isDualWriteEnabled
+    }
+
+    private func copyToPasteboard(_ value: String) {
+        #if os(iOS)
+        UIPasteboard.general.string = value
+        #elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(value, forType: .string)
+        #endif
     }
 }

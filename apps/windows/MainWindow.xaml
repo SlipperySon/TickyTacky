@@ -1,0 +1,63 @@
+<Window x:Class="Tickytacky.Windows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tickytacky Windows"
+        Height="720"
+        Width="480"
+        MinWidth="400"
+        MinHeight="560"
+        Background="{StaticResource CanvasBrush}">
+  <DockPanel>
+    <Rectangle DockPanel.Dock="Top" Height="6" Fill="{StaticResource KraftBrush}"/>
+
+    <Border DockPanel.Dock="Top" Background="{StaticResource SurfaceBrush}" Padding="20,14"
+            BorderBrush="{StaticResource RuleBrush}" BorderThickness="0,0,0,1">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+          <TextBlock Text="Tickytacky Windows"
+                     FontSize="22"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource InkBrush}"/>
+          <TextBlock Text="WPF prototype · not the Apple app in apps/ios"
+                     Foreground="{StaticResource InkMutedBrush}"
+                     FontSize="13"
+                     Margin="0,4,0,0"/>
+        </StackPanel>
+        <Border Grid.Column="1"
+                Background="{StaticResource KraftSoftBrush}"
+                BorderBrush="{StaticResource KraftBrush}"
+                BorderThickness="1"
+                CornerRadius="12"
+                Padding="10,4"
+                VerticalAlignment="Top">
+          <TextBlock Text="WINDOWS"
+                     FontSize="11"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource OnKraftBrush}"/>
+        </Border>
+      </Grid>
+    </Border>
+
+    <ListBox x:Name="Nav"
+             DockPanel.Dock="Left"
+             Width="128"
+             BorderThickness="0,0,1,0"
+             BorderBrush="{StaticResource RuleBrush}"
+             Background="{StaticResource SurfaceBrush}"
+             Padding="8"
+             SelectionChanged="Nav_OnSelectionChanged">
+      <ListBoxItem Content="Today" IsSelected="True"/>
+      <ListBoxItem Content="Calendar"/>
+      <ListBoxItem Content="Focus"/>
+      <ListBoxItem Content="Settings"/>
+    </ListBox>
+
+    <ScrollViewer Padding="20">
+      <StackPanel x:Name="Pane"/>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

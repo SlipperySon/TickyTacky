@@ -29,6 +29,19 @@ GoogleService-Info.plist
 supabase/.branches
 supabase/.temp
 
+# Web
+node_modules/
+apps/web/dist/
+
+# Android
+apps/android/.gradle/
+apps/android/**/build/
+local.properties
+
+# Windows / .NET
+apps/windows/bin/
+apps/windows/obj/
+
 # IDE
 .idea/
 *.swp

@@ -4,7 +4,7 @@ import Foundation
 import Observation
 import Supabase
 
-/// Sign in with Apple → Supabase session. Local CRUD works without a session.
+/// Sign in with Apple **or** a device sync key → Supabase session. Local CRUD works without a session.
 @MainActor
 @Observable
 final class AuthService {
@@ -13,6 +13,7 @@ final class AuthService {
     private(set) var session: Session?
     private(set) var isLoading = false
     private(set) var lastError: String?
+    private(set) var lastIssuedSyncKey: String?
 
     var isSignedIn: Bool { session != nil }
     var userId: String? { session?.user.id.uuidString.lowercased() }
@@ -112,6 +113,7 @@ final class AuthService {
     func signOut() async {
         guard let client = SupabaseClientConfig.client else {
             session = nil
+            lastIssuedSyncKey = nil
             clearLocalUserCache()
             return
         }
@@ -121,10 +123,71 @@ final class AuthService {
         do {
             try await client.auth.signOut()
             session = nil
+            lastIssuedSyncKey = nil
             clearLocalUserCache()
         } catch {
             lastError = error.localizedDescription
         }
+    }
+
+    /// Creates a pairing key for Web / Android / Windows. Shown once; copy it now.
+    func issueSyncKey() async {
+        isLoading = true
+        lastError = nil
+        defer { isLoading = false }
+        do {
+            let envelope = try await invokeSyncKey(["action": "issue"])
+            if let message = envelope.error, !message.isEmpty { throw AuthError.syncKey(message) }
+            try await applySyncSession(envelope)
+            lastIssuedSyncKey = envelope.key
+            SyncEngine.shared.syncIfPossible()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    /// Other devices: paste the key shown on the Apple device.
+    func redeemSyncKey(_ raw: String) async {
+        isLoading = true
+        lastError = nil
+        defer { isLoading = false }
+        do {
+            let envelope = try await invokeSyncKey(["action": "redeem", "key": raw])
+            if let message = envelope.error, !message.isEmpty { throw AuthError.syncKey(message) }
+            try await applySyncSession(envelope)
+            lastIssuedSyncKey = nil
+            SyncEngine.shared.syncIfPossible()
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    private func applySyncSession(_ envelope: SyncKeyEnvelope) async throws {
+        guard let client = SupabaseClientConfig.client else { throw AuthError.notConfigured }
+        guard let access = envelope.access_token, let refresh = envelope.refresh_token else {
+            throw AuthError.syncKey("No session returned.")
+        }
+        session = try await client.auth.setSession(accessToken: access, refreshToken: refresh)
+    }
+
+    private func invokeSyncKey(_ body: [String: String]) async throws -> SyncKeyEnvelope {
+        let config = SupabaseClientConfig.shared
+        guard config.isConfigured, let base = URL(string: config.urlString) else {
+            throw AuthError.notConfigured
+        }
+        var request = URLRequest(url: base.appending(path: "functions/v1/sync-key"))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
+        let token = session?.accessToken ?? config.anonKey
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse, http.statusCode >= 400 {
+            let envelope = try? JSONDecoder().decode(SyncKeyEnvelope.self, from: data)
+            throw AuthError.syncKey(envelope?.error ?? "Sync key request failed (\(http.statusCode)).")
+        }
+        return try JSONDecoder().decode(SyncKeyEnvelope.self, from: data)
     }
 
     /// Wipe local domain data so a shared device cannot browse the previous account offline.
@@ -171,16 +234,25 @@ final class AuthService {
     }
 }
 
+private struct SyncKeyEnvelope: Decodable {
+    var key: String?
+    var access_token: String?
+    var refresh_token: String?
+    var error: String?
+}
+
 enum AuthError: LocalizedError {
     case invalidCredential
     case missingIdentityToken
     case notConfigured
+    case syncKey(String)
 
     var errorDescription: String? {
         switch self {
         case .invalidCredential: "Invalid Apple credential."
         case .missingIdentityToken: "Apple did not return an identity token."
         case .notConfigured: "Supabase is not configured."
+        case .syncKey(let message): message
         }
     }
 }

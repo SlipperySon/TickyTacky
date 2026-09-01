@@ -1,0 +1,261 @@
+:root {
+  --canvas: #f3ebdd;
+  --canvas-ruled: #e5dcce;
+  --surface: #fbf6ec;
+  --surface-ink: #fffcf6;
+  --ink: #2a2622;
+  --ink-muted: #7a7268;
+  --ink-faint: #a39a8e;
+  --rule: #d4cbba;
+  --rule-notebook: #c5d4e0;
+  --accent: #7faf98;
+  --accent-soft: #e2f0e8;
+  --sky: #8bb4c9;
+  --sky-soft: #e0eef5;
+  --overdue: #c47a6c;
+  --platform: #8bb4c9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "Source Sans 3", system-ui, sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-stripe {
+  height: 6px;
+  background: var(--platform);
+}
+
+.platform-banner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+
+.wordmark {
+  font-family: Nunito, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.platform-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1e2c34;
+  background: var(--sky-soft);
+  border: 1px solid var(--sky);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.banner-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+nav.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+
+nav.tabs button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+nav.tabs button[aria-current="page"] {
+  color: var(--ink);
+  background: var(--sky-soft);
+}
+
+main {
+  flex: 1;
+  padding: 20px 20px 32px;
+  max-width: 720px;
+}
+
+h1 {
+  font-family: Nunito, system-ui, sans-serif;
+  font-size: 1.5rem;
+  margin: 0 0 4px;
+}
+
+.lede {
+  margin: 0 0 20px;
+  color: var(--ink-muted);
+}
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 20px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--rule-notebook);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface-ink);
+  border-bottom: 1px solid var(--rule);
+}
+
+.row:first-of-type {
+  border-radius: 8px 8px 0 0;
+}
+
+.row:last-of-type {
+  border-radius: 0 0 8px 8px;
+}
+
+.check {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.check.done {
+  background: var(--accent);
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.overdue {
+  color: var(--overdue);
+  font-weight: 600;
+}
+
+.block {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 88%, white);
+  color: #1f2e28;
+  font-weight: 600;
+}
+
+.block time {
+  display: block;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  font-size: 0.85rem;
+}
+
+.placeholder {
+  color: var(--ink-muted);
+  background: var(--surface);
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  padding: 24px 16px;
+}
+
+.row.as-button {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.error {
+  color: var(--overdue);
+  font-weight: 600;
+}
+
+.auth-form,
+.add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.add-row {
+  flex-direction: row;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+input {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface-ink);
+  color: var(--ink);
+}
+
+.auth-actions {
+  display: flex;
+  gap: 8px;
+}
+
+button.primary,
+.auth-actions button,
+.add-row button {
+  appearance: none;
+  border: 0;
+  background: var(--accent);
+  color: #1f2e28;
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.55;
+}

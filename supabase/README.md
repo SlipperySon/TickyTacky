@@ -72,6 +72,18 @@ dogfood. Occurrences are never stored (computed client-side) — only exceptions
 
 - **Demo login (local only):** `demo@tickytacky.app` / `tickytacky`
 
+Hosted project (API healthy 2026-09-01): `https://fgdmonniblfzapdpxfxc.supabase.co`
+
+| Check | Result |
+|-------|--------|
+| REST `lists` / `tasks` | 200 (empty for anon — RLS) |
+| Auth | Email **on**, Apple **off**, signup on, **confirm email on** |
+| MCP SQL / migrations | Database password for the management role is currently **rejected** — reset it in the dashboard if you need Studio SQL / `db push` from here |
+
+Non-Apple clients use a **sync key** created on the Apple app (Settings). Edge Function `sync-key`; table `public.sync_keys`. See [`apps/_shared/SYNC.md`](../apps/_shared/SYNC.md).
+
+**Dashboard (so all three can actually complete signup):** Authentication → Providers → Email → disable **Confirm email** (or confirm via Mail). Enable **Apple** if the iOS client should sign in on hosted.
+
 ## Linking a hosted project
 
 ```bash

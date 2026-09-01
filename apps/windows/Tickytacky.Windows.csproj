@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Tickytacky.Windows</RootNamespace>
+    <AssemblyName>Tickytacky.Windows</AssemblyName>
+    <ApplicationTitle>Tickytacky Windows</ApplicationTitle>
+    <Product>Tickytacky Windows</Product>
+    <AssemblyTitle>Tickytacky Windows</AssemblyTitle>
+    <Description>Windows prototype — not the Apple client in apps/ios</Description>
+  </PropertyGroup>
+</Project>
