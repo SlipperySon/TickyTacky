@@ -3,9 +3,11 @@ import SwiftUI
 @main
 struct TickytackyApp: App {
     private let database = AppDatabase.shared
+    @State private var themeStore = ThemeStore.shared
 
     init() {
         ReminderScheduler.shared.configure()
+        CalendarBridgeCoordinator.shared.configure()
         SyncEngine.shared.configure(database: database)
         // Prefer tag subheadings; migrate older false default once.
         if UserDefaults.standard.object(forKey: "list.groupByTag.defaulted") == nil {
@@ -24,6 +26,7 @@ struct TickytackyApp: App {
                 .environment(\.appDatabase, database)
                 .environment(\.calendar, AppCalendar.gregorian)
                 .environment(\.locale, AppCalendar.locale)
+                .tickytackyTheme(themeStore)
                 .preferredColorScheme(nil)
                 .onOpenURL { url in
                     if let link = ReminderDeepLink.parse(url: url) {
@@ -35,6 +38,7 @@ struct TickytackyApp: App {
                 }
                 .task {
                     await ReminderScheduler.shared.refresh(database: database)
+                    await CalendarBridgeCoordinator.shared.publishEnabled(database: database)
                     _ = AuthService.shared
                     SyncEngine.shared.syncIfPossible()
                 }
@@ -50,7 +54,7 @@ struct TickytackyApp: App {
     }
 }
 
-/// Refreshes reminders + best-effort sync on foreground.
+/// Refreshes reminders + calendar bridges + best-effort sync on foreground.
 private struct ReminderLifecycleObserver: View {
     @Environment(\.scenePhase) private var scenePhase
     let database: AppDatabase
@@ -61,6 +65,7 @@ private struct ReminderLifecycleObserver: View {
                 if phase == .active {
                     Task {
                         await ReminderScheduler.shared.refresh(database: database)
+                        CalendarBridgeCoordinator.shared.handleForeground()
                         SyncEngine.shared.syncIfPossible()
                     }
                 }

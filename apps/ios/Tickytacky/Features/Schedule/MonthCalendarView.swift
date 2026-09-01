@@ -15,7 +15,7 @@ struct MonthCalendarView: View {
     @State private var schedule: ScheduleRecord?
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private static let monthFormatter = AppCalendar.monthYear
 
@@ -30,17 +30,14 @@ struct MonthCalendarView: View {
     var body: some View {
         ZStack {
             theme.canvas.ignoresSafeArea()
-            HStack(spacing: 0) {
-                theme.canvasRuled
-                    .frame(width: 14)
-                    .ignoresSafeArea()
-                VStack(spacing: 0) {
-                    monthHeader
-                    weekdayHeader
-                    monthGrid
-                    Divider().overlay(theme.rule)
-                    dayDetail
-                }
+            VStack(spacing: 0) {
+                monthHeader
+                weekdayHeader
+                monthGrid
+                Divider().overlay(theme.rule)
+                dayDetail
+                    .frame(minHeight: 160)
+                    .layoutPriority(1)
             }
         }
         .toolbar {
@@ -250,9 +247,17 @@ struct MonthCalendarView: View {
         guard let gridStart = calendar.date(byAdding: .day, value: -leading, to: monthStart) else {
             return []
         }
-        return (0..<42).compactMap { offset in
+        let days = (0..<42).compactMap { offset in
             calendar.date(byAdding: .day, value: offset, to: gridStart).map { calendar.startOfDay(for: $0) }
         }
+        // Drop trailing weeks that fall entirely outside the visible month (often week 6).
+        guard let lastInMonth = days.lastIndex(where: {
+            calendar.isDate($0, equalTo: visibleMonth, toGranularity: .month)
+        }) else {
+            return days
+        }
+        let weekEnd = ((lastInMonth / 7) + 1) * 7
+        return Array(days.prefix(weekEnd))
     }
 
     private func dayAccessibilityLabel(day: Date, inMonth: Bool, mark: DayMark?, isToday: Bool) -> String {

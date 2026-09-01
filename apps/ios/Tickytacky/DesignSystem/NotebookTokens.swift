@@ -23,6 +23,28 @@ struct NotebookTokens: ThemeTokens {
     let warning = Color(hex: 0xD4B56A)
 }
 
+/// Dimmed Classic Notebook for system Dark Mode (sage + sky retained).
+struct NotebookDarkTokens: ThemeTokens {
+    let canvas = Color(hex: 0x1C1A17)
+    let canvasRuled = Color(hex: 0x24211C)
+    let surface = Color(hex: 0x26231F)
+    let surfaceInk = Color(hex: 0x2E2A25)
+    let ink = Color(hex: 0xEDE6DA)
+    let inkMuted = Color(hex: 0x9A9084)
+    let inkFaint = Color(hex: 0x6F675C)
+    let rule = Color(hex: 0x3A3530)
+    let ruleNotebook = Color(hex: 0x3A4550)
+    let accent = Color(hex: 0x8FBFAB)
+    let accentPressed = Color(hex: 0x7FAF98)
+    let accentSoft = Color(hex: 0x2A3830)
+    let accentSecondary = Color(hex: 0x9BC0D1)
+    let accentSecondarySoft = Color(hex: 0x2A343C)
+    let todayMark = Color(hex: 0x9BC0D1)
+    let danger = Color(hex: 0xC46B5D)
+    let overdue = Color(hex: 0xC47A6C)
+    let warning = Color(hex: 0xD4B56A)
+}
+
 extension Color {
     init(hex: UInt32, opacity: Double = 1) {
         let r = Double((hex >> 16) & 0xFF) / 255

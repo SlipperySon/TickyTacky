@@ -11,7 +11,7 @@ struct FocusView: View {
     @State private var todaySessions: [FocusSessionRecord] = []
     @State private var completedWorkToday = 0
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         Group {
@@ -39,15 +39,8 @@ struct FocusView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
-            .padding(.leading, 14)
         }
-        .background {
-            HStack(spacing: 0) {
-                theme.canvasRuled.frame(width: 14)
-                theme.canvas
-            }
-            .ignoresSafeArea()
-        }
+        .background(theme.canvas.ignoresSafeArea())
         .navigationTitle("Focus")
         .sheet(isPresented: $showTaskPicker) {
             FocusTaskPicker { task in
@@ -79,8 +72,8 @@ struct FocusView: View {
             set: { engine.selectPhase($0) }
         )) {
             Text("Focus").tag(FocusSessionKind.work)
-            Text("Short break").tag(FocusSessionKind.shortBreak)
-            Text("Long break").tag(FocusSessionKind.longBreak)
+            Text("Short").tag(FocusSessionKind.shortBreak)
+            Text("Long").tag(FocusSessionKind.longBreak)
         }
         .pickerStyle(.segmented)
         .disabled(engine.isRunning)
@@ -272,7 +265,7 @@ private struct FocusTaskPicker: View {
     var onPick: (TaskRecord?) -> Void
 
     @State private var tasks: [TaskRecord] = []
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
@@ -284,6 +277,7 @@ private struct FocusTaskPicker: View {
                     Text("No linked task")
                         .foregroundStyle(theme.inkMuted)
                 }
+                .listRowBackground(theme.canvas)
                 ForEach(tasks) { task in
                     Button {
                         onPick(task)
@@ -299,6 +293,7 @@ private struct FocusTaskPicker: View {
                             }
                         }
                     }
+                    .listRowBackground(theme.canvas)
                 }
             }
             .scrollContentBackground(.hidden)

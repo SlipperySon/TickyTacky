@@ -3,7 +3,7 @@ import SwiftUI
 struct TodayView: View {
     @Environment(\.appDatabase) private var database
     @Environment(\.calendar) private var calendar
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     /// When false, parent (e.g. iPad/Mac split detail) already provides NavigationStack.
     var embedsNavigationStack: Bool = true
@@ -25,23 +25,19 @@ struct TodayView: View {
     }
 
     private var root: some View {
-        HStack(spacing: 0) {
-            theme.canvasRuled
-                .frame(width: 14)
-            content
-        }
-        .background(theme.canvas)
-        .modifier(OptionalNavigationTitle(title: "Today", enabled: showsNavigationTitle))
-        .sheet(item: $selectedOccurrence) { occurrence in
-            OccurrenceActionsSheet(occurrence: occurrence) { reload() }
-        }
-        .task { reload() }
-        .onReceive(NotificationCenter.default.publisher(for: .tickytackyContentDidChange)) { _ in
-            reload()
-        }
-        .onTaskListDeleteCommand(selection: selectedTaskIds) { ids in
-            softDeleteTasks(ids)
-        }
+        content
+            .background(theme.canvas)
+            .modifier(OptionalNavigationTitle(title: "Today", enabled: showsNavigationTitle))
+            .sheet(item: $selectedOccurrence) { occurrence in
+                OccurrenceActionsSheet(occurrence: occurrence) { reload() }
+            }
+            .task { reload() }
+            .onReceive(NotificationCenter.default.publisher(for: .tickytackyContentDidChange)) { _ in
+                reload()
+            }
+            .onTaskListDeleteCommand(selection: selectedTaskIds) { ids in
+                softDeleteTasks(ids)
+            }
     }
 
     @ViewBuilder

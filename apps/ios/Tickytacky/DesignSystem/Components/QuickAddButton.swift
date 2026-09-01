@@ -3,7 +3,7 @@ import SwiftUI
 /// Floating sage quick-add control (toolbar / FAB-ish). Scales with Dynamic Type.
 struct QuickAddButton: View {
     var action: () -> Void
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     @ScaledMetric(relativeTo: .title2) private var side: CGFloat = 48
 

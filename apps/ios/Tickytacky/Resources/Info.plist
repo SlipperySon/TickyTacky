@@ -6,6 +6,10 @@
 	<string>YOUR_SUPABASE_URL</string>
 	<key>SUPABASE_ANON_KEY</key>
 	<string>YOUR_SUPABASE_ANON_KEY</string>
+	<key>GOOGLE_CALENDAR_CLIENT_ID</key>
+	<string>$(GOOGLE_CALENDAR_CLIENT_ID)</string>
+	<key>GOOGLE_CALENDAR_REVERSED_CLIENT_ID</key>
+	<string>$(GOOGLE_CALENDAR_REVERSED_CLIENT_ID)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Tickytacky</string>
 	<key>CFBundleURLTypes</key>
@@ -16,6 +20,14 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>tickytacky</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>app.tickytacky.ios.google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_CALENDAR_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>

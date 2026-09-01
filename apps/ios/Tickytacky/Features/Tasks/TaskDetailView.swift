@@ -31,7 +31,7 @@ struct TaskDetailView: View {
     @State private var reminderOffsetMinutes = 15
     @State private var groceryNudgeDismissed = false
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
     private let reminderChoices = [0, 5, 15, 30, 60, 120, 1440]
 
     private var showsGroceryNudge: Bool {
@@ -64,6 +64,7 @@ struct TaskDetailView: View {
                                 applyCompletion(newValue)
                             }
                     }
+                    .notebookGroupedRowBackground()
 
                     if showsGroceryNudge {
                         Section {
@@ -105,6 +106,7 @@ struct TaskDetailView: View {
                         .tint(theme.accent)
                         .disabled(isCompleted)
                     }
+                    .notebookGroupedRowBackground()
 
                     Section("List") {
                         Picker("List", selection: $listId) {
@@ -113,6 +115,7 @@ struct TaskDetailView: View {
                             }
                         }
                     }
+                    .notebookGroupedRowBackground()
 
                     Section {
                         if allTags.isEmpty {
@@ -145,6 +148,7 @@ struct TaskDetailView: View {
                     } header: {
                         Text("Tags")
                     }
+                    .notebookGroupedRowBackground()
 
                     Section("Due") {
                         Toggle("Due date", isOn: $hasDueDate)
@@ -158,6 +162,7 @@ struct TaskDetailView: View {
                             }
                         }
                     }
+                    .notebookGroupedRowBackground()
 
                     Section("Priority") {
                         Picker("Priority", selection: $priority) {
@@ -173,6 +178,7 @@ struct TaskDetailView: View {
                         .pickerStyle(.menu)
                         .accessibilityLabel("Priority \(priority.title)")
                     }
+                    .notebookGroupedRowBackground()
 
                     Section {
                         Toggle("Repeat", isOn: $isRecurring)
@@ -201,6 +207,7 @@ struct TaskDetailView: View {
                     } header: {
                         Text("Recurrence")
                     }
+                    .notebookGroupedRowBackground()
 
                     Section {
                         Toggle("Remind me", isOn: $hasReminder)
@@ -230,6 +237,7 @@ struct TaskDetailView: View {
                     } header: {
                         Text("Reminder")
                     }
+                    .notebookGroupedRowBackground()
 
                     Section("Subtasks") {
                         ForEach(subtasks) { sub in
@@ -268,17 +276,20 @@ struct TaskDetailView: View {
                                 .tint(theme.accent)
                         }
                     }
+                    .notebookGroupedRowBackground()
 
                     Section {
                         Button("Delete Task", role: .destructive) {
                             showDeleteConfirm = true
                         }
                     }
+                    .notebookGroupedRowBackground()
 
                     if let errorMessage {
                         Section {
                             Text(errorMessage).foregroundStyle(theme.danger)
                         }
+                        .notebookGroupedRowBackground()
                     }
                 }
             } else {

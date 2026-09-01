@@ -3,7 +3,7 @@ import SwiftUI
 /// Pastel sticker row for a timetable occurrence (DESIGN.md r=5–6).
 struct ScheduleOccurrenceRow: View {
     var occurrence: ScheduleOccurrence
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private var swatch: PastelSwatch { PastelSwatch.resolve(occurrence.color) }
 

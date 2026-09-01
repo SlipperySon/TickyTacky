@@ -15,7 +15,7 @@ struct ListEditorSheet: View {
     @State private var name = ""
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
@@ -30,10 +30,12 @@ struct ListEditorSheet: View {
                             .foregroundStyle(theme.inkFaint)
                     }
                 }
+                .notebookGroupedRowBackground()
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)

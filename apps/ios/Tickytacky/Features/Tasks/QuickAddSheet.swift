@@ -17,7 +17,7 @@ struct QuickAddSheet: View {
     @State private var showGroceryOffer = false
     @FocusState private var titleFocused: Bool
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private var selectedListName: String {
         lists.first(where: { $0.id == listId })?.name ?? "this list"
@@ -37,6 +37,7 @@ struct QuickAddSheet: View {
                         .submitLabel(.done)
                         .onSubmit { save() }
                 }
+                .notebookGroupedRowBackground()
                 if lists.count > 1 {
                     Section {
                         Picker("List", selection: $listId) {
@@ -50,6 +51,7 @@ struct QuickAddSheet: View {
                         Text("Keep lists few (e.g. Life + Groceries). Use tags for classes and projects.")
                             .foregroundStyle(theme.inkFaint)
                     }
+                    .notebookGroupedRowBackground()
                 }
                 if !allTags.isEmpty && !selectedIsGrocery {
                     Section {
@@ -74,11 +76,13 @@ struct QuickAddSheet: View {
                         Text("Tags become subheadings when the list is grouped by tag.")
                             .foregroundStyle(theme.inkFaint)
                     }
+                    .notebookGroupedRowBackground()
                 }
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)

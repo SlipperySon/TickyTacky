@@ -56,8 +56,15 @@ targets:
         # Overridden by Secrets.xcconfig when present
         SUPABASE_URL: YOUR_SUPABASE_URL
         SUPABASE_ANON_KEY: YOUR_SUPABASE_ANON_KEY
+        GOOGLE_CALENDAR_CLIENT_ID: YOUR_IOS_OAUTH_CLIENT_ID.apps.googleusercontent.com
+        GOOGLE_CALENDAR_REVERSED_CLIENT_ID: com.googleusercontent.apps.YOUR_IOS_OAUTH_CLIENT_ID
         INFOPLIST_KEY_SUPABASE_URL: "$(SUPABASE_URL)"
         INFOPLIST_KEY_SUPABASE_ANON_KEY: "$(SUPABASE_ANON_KEY)"
+        INFOPLIST_KEY_GOOGLE_CALENDAR_CLIENT_ID: "$(GOOGLE_CALENDAR_CLIENT_ID)"
+        INFOPLIST_KEY_GOOGLE_CALENDAR_REVERSED_CLIENT_ID: "$(GOOGLE_CALENDAR_REVERSED_CLIENT_ID)"
+        INFOPLIST_KEY_NSCalendarsUsageDescription: "Tickytacky can add your timetable to a Tickytacky calendar in the Calendar app."
+        INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription: "Tickytacky creates a Tickytacky calendar and keeps your timetable blocks visible next to your other calendars. Full access lets Calendar edits update Tickytacky when two-way sync is on."
+        INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription: "Tickytacky can add timetable blocks to your calendars."
       configs:
         Debug:
           ENABLE_TESTABILITY: YES
@@ -68,6 +75,9 @@ targets:
         product: GRDB
       - package: Supabase
         product: Supabase
+      - sdk: EventKit.framework
+      - sdk: AuthenticationServices.framework
+      - sdk: Security.framework
   TickytackyTests:
     type: bundle.unit-test
     supportedDestinations: [iOS]

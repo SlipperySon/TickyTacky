@@ -4,7 +4,7 @@ import SwiftUI
 struct TaskRow: View {
     let task: TaskRecord
     var onToggleComplete: () -> Void
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {

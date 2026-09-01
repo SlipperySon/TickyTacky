@@ -6,8 +6,20 @@ struct CenterPlusTabBar: View {
     @Binding var selectedTab: Int
     var onPlus: () -> Void
 
-    private let theme = Theme.current
-    private let plusSize: CGFloat = 44
+    @Environment(\.theme) private var theme
+    private let iconPointSize: CGFloat = 20
+    private let plusCircleSize: CGFloat = 55
+    /// Shared band so tab icons and the larger + stay vertically centred together.
+    private var iconBandHeight: CGFloat { plusCircleSize }
+    private let labelHeight: CGFloat = 14
+    private let columnSpacing: CGFloat = 0
+
+    private let tabs: [(title: String, systemImage: String)] = [
+        ("Today", "sun.max"),
+        ("Calendar", "calendar"),
+        ("Focus", "timer"),
+        ("Settings", "gearshape"),
+    ]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,35 +28,24 @@ struct CenterPlusTabBar: View {
                 .frame(height: 1)
                 .allowsHitTesting(false)
 
-            HStack(alignment: .center, spacing: 0) {
-                tabButton(index: 0, title: "Today", systemImage: "sun.max")
-                tabButton(index: 1, title: "Calendar", systemImage: "calendar")
-
-                Spacer(minLength: 0)
-
-                Button(action: onPlus) {
-                    Image(systemName: "plus")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(theme.surfaceInk)
-                        .frame(width: plusSize, height: plusSize)
-                        .background(theme.accent, in: Circle())
+            GeometryReader { geo in
+                let slotWidth = geo.size.width / 5
+                HStack(alignment: .center, spacing: columnSpacing) {
+                    tabSlot(index: 0, width: slotWidth)
+                    tabSlot(index: 1, width: slotWidth)
+                    plusSlot(width: slotWidth)
+                    tabSlot(index: 2, width: slotWidth)
+                    tabSlot(index: 3, width: slotWidth)
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Add task or schedule")
-
-                Spacer(minLength: 0)
-
-                tabButton(index: 2, title: "Focus", systemImage: "timer")
-                tabButton(index: 3, title: "Settings", systemImage: "gearshape")
+                .frame(width: geo.size.width, height: geo.size.height, alignment: .center)
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 8)
-            .padding(.bottom, 8)
+            .frame(height: iconBandHeight + 3 + labelHeight)
+            .padding(.horizontal, 8)
+            .padding(.top, 20)
+            .padding(.bottom, 0)
         }
         .frame(maxWidth: .infinity)
         .background(theme.surface)
-        // Fill the home-indicator band only; this view’s layout height stays
-        // in the VStack below content so Today never scrolls underneath it.
         .background {
             theme.surface
                 .ignoresSafeArea(edges: .bottom)
@@ -53,24 +54,51 @@ struct CenterPlusTabBar: View {
         .accessibilityLabel("Tab bar")
     }
 
-    private func tabButton(index: Int, title: String, systemImage: String) -> some View {
+    private func tabSlot(index: Int, width: CGFloat) -> some View {
+        let tab = tabs[index]
         let selected = selectedTab == index
         return Button {
             selectedTab = index
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 20, weight: selected ? .semibold : .regular))
-                Text(title)
+                Image(systemName: tab.systemImage)
+                    .font(.system(size: iconPointSize, weight: selected ? .semibold : .regular))
+                    .symbolRenderingMode(.monochrome)
+                    .frame(width: iconBandHeight, height: iconBandHeight)
+
+                Text(tab.title)
                     .font(.caption2.weight(selected ? .semibold : .regular))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .frame(height: labelHeight)
             }
             .foregroundStyle(selected ? theme.accent : theme.inkMuted)
-            .frame(maxWidth: .infinity)
-            .frame(minHeight: plusSize)
+            .frame(width: width)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title)
+        .accessibilityLabel(tab.title)
         .accessibilityAddTraits(selected ? [.isSelected, .isButton] : .isButton)
+    }
+
+    private func plusSlot(width: CGFloat) -> some View {
+        Button(action: onPlus) {
+            VStack(spacing: 3) {
+                Image(systemName: "plus")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundStyle(theme.surfaceInk)
+                    .frame(width: plusCircleSize, height: plusCircleSize)
+                    .background(theme.accent, in: Circle())
+                    .frame(width: iconBandHeight, height: iconBandHeight)
+
+                // Same label band as tabs so the + stays optically centred in the row.
+                Color.clear
+                    .frame(height: labelHeight)
+            }
+            .frame(width: width)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Add task or schedule")
     }
 }

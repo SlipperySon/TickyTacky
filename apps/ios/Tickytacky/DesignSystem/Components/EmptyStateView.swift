@@ -4,7 +4,7 @@ import SwiftUI
 struct EmptyStateView: View {
     var title: String
     var message: String
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

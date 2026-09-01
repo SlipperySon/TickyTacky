@@ -4,7 +4,7 @@ import SwiftUI
 struct RootTabView: View {
     @Environment(\.appDatabase) private var database
     @Environment(\.horizontalSizeClass) private var sizeClass
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     @State private var selectedTab = 0
     @State private var sidebarSelection: SidebarItem? = .today

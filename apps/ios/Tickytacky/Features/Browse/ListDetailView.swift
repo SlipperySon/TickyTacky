@@ -18,7 +18,7 @@ struct ListDetailView: View {
     @AppStorage("list.groupByTag") private var groupByTag = true
     @FocusState private var groceryFieldFocused: Bool
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private var isGroceryList: Bool {
         guard let list else { return false }
@@ -26,19 +26,21 @@ struct ListDetailView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            theme.canvas.ignoresSafeArea()
-            content
-            if !isGroceryList {
-                QuickAddButton { showQuickAdd = true }
-                    .padding(20)
+        content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(theme.canvas.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom, alignment: .trailing) {
+                if !isGroceryList {
+                    QuickAddButton { showQuickAdd = true }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 8)
+                }
             }
-        }
-        .navigationTitle(list?.name ?? "List")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.large)
-        #endif
-        .toolbar {
+            .navigationTitle(list?.name ?? "List")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.large)
+            #endif
+            .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     if !isGroceryList {
@@ -149,6 +151,7 @@ struct ListDetailView: View {
                         .disabled(groceryDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         .tint(theme.accent)
                 }
+                .listRowBackground(theme.canvas)
             } header: {
                 sectionHeader("Checklist")
             } footer: {

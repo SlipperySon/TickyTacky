@@ -25,7 +25,7 @@ struct ScheduleBlockEditorSheet: View {
     @State private var lists: [TaskListRecord] = []
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
     private let weekdays = AppCalendar.weekdaysMondayFirst
     private let reminderChoices = [5, 10, 15, 30, 60]
 
@@ -41,6 +41,7 @@ struct ScheduleBlockEditorSheet: View {
                         }
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 Section("Time") {
                     HStack {
@@ -57,6 +58,7 @@ struct ScheduleBlockEditorSheet: View {
                         .font(.caption)
                         .foregroundStyle(theme.inkMuted)
                 }
+                .notebookGroupedRowBackground()
 
                 Section("Colour") {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 10) {
@@ -81,6 +83,7 @@ struct ScheduleBlockEditorSheet: View {
                     }
                     .padding(.vertical, 4)
                 }
+                .notebookGroupedRowBackground()
 
                 Section("List (optional)") {
                     Picker("List", selection: $listId) {
@@ -90,6 +93,7 @@ struct ScheduleBlockEditorSheet: View {
                         }
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 Section("Reminder") {
                     Toggle("Remind before start", isOn: $hasReminder)
@@ -107,6 +111,7 @@ struct ScheduleBlockEditorSheet: View {
                         }
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 if case .edit = mode {
                     Section {
@@ -114,12 +119,14 @@ struct ScheduleBlockEditorSheet: View {
                             deleteBlock()
                         }
                     }
+                    .notebookGroupedRowBackground()
                 }
 
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)

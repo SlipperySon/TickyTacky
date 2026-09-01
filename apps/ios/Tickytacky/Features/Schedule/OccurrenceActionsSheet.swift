@@ -15,7 +15,7 @@ struct OccurrenceActionsSheet: View {
     @State private var newEnd = Date()
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
@@ -41,6 +41,7 @@ struct OccurrenceActionsSheet: View {
                             .foregroundStyle(theme.accentSecondary)
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 Section {
                     Button("Skip this occurrence") {
@@ -57,17 +58,20 @@ struct OccurrenceActionsSheet: View {
                         }
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 Section {
                     Button("Edit weekly block") {
                         loadBlockAndEdit()
                     }
                 }
+                .notebookGroupedRowBackground()
 
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)
@@ -102,10 +106,12 @@ struct OccurrenceActionsSheet: View {
                     DatePicker("New start", selection: $newStart)
                     DatePicker("New end", selection: $newEnd)
                 }
+                .notebookGroupedRowBackground()
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)

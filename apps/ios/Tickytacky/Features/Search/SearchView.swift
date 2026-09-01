@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(\.appDatabase) private var database
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     @State private var query = ""
     @State private var debouncedQuery = ""

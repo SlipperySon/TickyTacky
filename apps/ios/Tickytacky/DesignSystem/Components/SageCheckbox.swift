@@ -8,7 +8,7 @@ struct SageCheckbox: View {
     /// When true, hide from VoiceOver (parent row provides the combined label + action).
     var accessibilityHidden: Bool = false
     var action: () -> Void
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     @ScaledMetric(relativeTo: .body) private var side: CGFloat = 18
 

@@ -12,7 +12,7 @@ struct TagDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var selectedTaskIds: Set<String> = []
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         ZStack {

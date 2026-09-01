@@ -31,7 +31,7 @@ enum UpcomingPane: String, CaseIterable, Identifiable {
 
 /// Calendar tab: Day Gantt, weekly timetable, or month grid (AU week starts Monday).
 struct UpcomingView: View {
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var embedsNavigationStack: Bool = true
 

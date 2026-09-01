@@ -12,7 +12,7 @@ struct DayGanttView: View {
     @State private var showEditor = false
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
     private let hourHeight: CGFloat = 52
     private let gutterWidth: CGFloat = 52
     private let defaultStartHour = 6
@@ -24,21 +24,16 @@ struct DayGanttView: View {
     var body: some View {
         ZStack {
             theme.canvas.ignoresSafeArea()
-            HStack(spacing: 0) {
-                theme.canvasRuled
-                    .frame(width: 14)
-                    .ignoresSafeArea()
-                VStack(spacing: 0) {
-                    dayHeader
-                    Divider().overlay(theme.rule)
-                    if let errorMessage {
-                        Text(errorMessage)
-                            .foregroundStyle(theme.danger)
-                            .padding(20)
-                        Spacer()
-                    } else {
-                        ganttScroll
-                    }
+            VStack(spacing: 0) {
+                dayHeader
+                Divider().overlay(theme.rule)
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundStyle(theme.danger)
+                        .padding(20)
+                    Spacer()
+                } else {
+                    ganttScroll
                 }
             }
         }
@@ -111,43 +106,45 @@ struct DayGanttView: View {
         .foregroundStyle(theme.ink)
     }
 
+    @ViewBuilder
     private var ganttScroll: some View {
-        let range = visibleHourRange
-        let hours = Array(range.start..<range.end)
-        let totalHeight = CGFloat(hours.count) * hourHeight
-        let lanes = assignLanes(occurrences)
+        if occurrences.isEmpty {
+            ScrollView {
+                EmptyStateView(
+                    title: "Nothing scheduled",
+                    message: "Add a timetable block — it’ll show as a bar on this day."
+                )
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        } else {
+            let range = visibleHourRange
+            let hours = Array(range.start..<range.end)
+            let totalHeight = CGFloat(hours.count) * hourHeight
+            let lanes = assignLanes(occurrences)
 
-        return ScrollView {
-            GeometryReader { geo in
-                let trackWidth = max(80, geo.size.width - gutterWidth - 8)
-                ZStack(alignment: .topLeading) {
-                    hourGrid(hours: hours, height: totalHeight)
+            ScrollView {
+                GeometryReader { geo in
+                    let trackWidth = max(80, geo.size.width - gutterWidth - 8)
+                    ZStack(alignment: .topLeading) {
+                        hourGrid(hours: hours, height: totalHeight)
 
-                    ForEach(occurrences) { occurrence in
-                        let lane = lanes[occurrence.id] ?? 0
-                        let laneCount = max(1, (lanes.values.max() ?? 0) + 1)
-                        bar(
-                            for: occurrence,
-                            rangeStart: range.start,
-                            lane: lane,
-                            laneCount: laneCount,
-                            trackWidth: trackWidth
-                        )
-                    }
-
-                    if occurrences.isEmpty {
-                        EmptyStateView(
-                            title: "Nothing scheduled",
-                            message: "Add a timetable block — it’ll show as a bar on this day."
-                        )
-                        .padding(20)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 24)
+                        ForEach(occurrences) { occurrence in
+                            let lane = lanes[occurrence.id] ?? 0
+                            let laneCount = max(1, (lanes.values.max() ?? 0) + 1)
+                            bar(
+                                for: occurrence,
+                                rangeStart: range.start,
+                                lane: lane,
+                                laneCount: laneCount,
+                                trackWidth: trackWidth
+                            )
+                        }
                     }
                 }
+                .frame(height: max(totalHeight, 200))
+                .padding(.trailing, 8)
             }
-            .frame(height: max(totalHeight, 200))
-            .padding(.trailing, 8)
         }
     }
 

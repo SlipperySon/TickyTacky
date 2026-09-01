@@ -745,7 +745,7 @@ Do **not** start until the J batch has been dogfooded. Revisit whether widgets a
 - [ ] Eisenhower matrix
 - [ ] Attachments
 - [ ] Collaboration architecture spike (Supabase already supports; design sharing later)
-- [ ] EventKit sync spike (`RISK` — often more pain than value)
+- [x] EventKit / calendar bridge (`RISK`) — Apple one-way + two-way, Google one-way + two-way (ASWebAuth + REST); see `Domain/CalendarBridge/CalendarBridge.md`
 - [ ] Apple Watch app
 - [ ] Advanced analytics
 - [ ] Widgets if skipped in K

@@ -4,7 +4,7 @@ import SwiftUI
 struct TagChip: View {
     let name: String
     var isSelected: Bool = false
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         Text(name)

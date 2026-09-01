@@ -15,7 +15,7 @@ struct TagEditorSheet: View {
     @State private var name = ""
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var body: some View {
         NavigationStack {
@@ -25,10 +25,12 @@ struct TagEditorSheet: View {
                         .submitLabel(.done)
                         .onSubmit { save() }
                 }
+                .notebookGroupedRowBackground()
                 if let errorMessage {
                     Section {
                         Text(errorMessage).foregroundStyle(theme.danger)
                     }
+                    .notebookGroupedRowBackground()
                 }
             }
             .scrollContentBackground(.hidden)

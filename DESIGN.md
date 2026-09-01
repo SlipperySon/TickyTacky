@@ -24,29 +24,29 @@ Related: [`MEM.md`](MEM.md) · [`SCOPE.md`](SCOPE.md)
 ## Theme system (MVP vs later)
 
 ### MVP
-- Ship **only** Classic Notebook (light)
-- Dark mode: **mapped Notebook dark** (same theme, dimmed paper) — system appearance, not a separate selectable theme yet
-- Hard-code tokens in `DesignTokens` / `Theme.notebook`
+- Ship **Classic Notebook** in light
+- Dark Mode: Settings → **Dark appearance** — `notebook` (dimmed paper + sage), **`morocco`** (leather-bound cocoa), or **`clothbound`** (charcoal + kraft gilt)
+- Persist `appearance.darkThemeID` locally
+- Views read `Environment(\.theme)`; never raw hex in chrome
 
-### Later (P1/P2 — do not build now)
-- Settings → **Appearance → Theme**
-- Themes are swappable token packs (same components, different colors/radii/line style)
-- Persist `selectedThemeID` on user settings (API-backed when sync exists)
+### Later (P1/P2)
+- Full light theme packs (graphite / ink) still parked
+- Persist theme on user settings when sync exists
 - Candidate future packs (placeholders only):
 
 | Theme ID | Intent |
 |----------|--------|
-| `notebook` | Default — warm paper, pastel sage/sky *(shipping)* |
+| `notebook` | Default — warm paper, pastel sage/sky *(shipping light + default dark)* |
+| `morocco` | Dark option — cocoa leather, parchment ink, kraft chrome *(shipping)* |
+| `clothbound` | Dark option — charcoal cloth, parchment ink, kraft gilt *(shipping)* |
 | `graphite` | Cool gray, sharper green (old candidate A) |
 | `ink` | Higher contrast, cooler, less beige |
 | `midnight` | True dark-first (not just inverted notebook) |
 
-Components must read colors from a **theme token API**, never raw hex in views — so future themes don’t require UI rewrites.
-
 ```text
-View → ThemeTokens.current.accent
-     → (MVP: always NotebookTokens)
-     → (Later: switch on selectedThemeID)
+View → Environment(\.theme).accent
+     → ThemePalette.resolve(colorScheme, darkThemeID)
+     → NotebookTokens | NotebookDarkTokens | MoroccoTokens | ClothboundTokens
 ```
 
 ---
@@ -136,11 +136,11 @@ Timetable blocks: use swatch fill at ~88% opacity on paper; title in on-fill col
 - Quick add present: gentle 200ms (easeOut), no bounce
 - Timetable day change: short cross-fade; respect Reduce Motion
 
-### Dark mapping (system — same theme family)
+### Dark mapping (Notebook — default Dark Mode)
 
-Not a separate selectable theme in MVP. Rough map:
+Same family as light, dimmed paper, sage + sky retained:
 
-| Light | Dark |
+| Light | Dark (Notebook) |
 |-------|------|
 | `canvas` `#F3EBDD` | `#1C1A17` |
 | `surface` `#FBF6EC` | `#26231F` |
@@ -148,6 +148,50 @@ Not a separate selectable theme in MVP. Rough map:
 | `rule` `#D4CBBA` | `#3A3530` |
 | `accent` `#7FAF98` | `#8FBFAB` |
 | `accentSecondary` `#8BB4C9` | `#9BC0D1` |
+
+### Dark option: Morocco
+
+Leather-bound journal. Cocoa ground, parchment writing, kraft/brass chrome — no sage. Settings → Dark appearance → **Morocco**.
+
+| Token | Hex | Role |
+|-------|-----|------|
+| `canvas` | `#1C1612` | Espresso paper |
+| `canvasRuled` | `#241C16` | Gutter |
+| `surface` | `#2A221C` | Tab bar, grouped rows |
+| `surfaceInk` | `#322820` | Inputs |
+| `ink` | `#E3D4C3` | Parchment text |
+| `inkMuted` | `#A89880` | Secondary |
+| `inkFaint` | `#8A7A68` | Completed / placeholders |
+| `rule` | `#3A322C` | Hairlines |
+| `ruleNotebook` | `#4A3E34` | Hour lines (warm, not sky) |
+| `accent` | `#C4A070` | Checks, selected tab, + |
+| `accentPressed` | `#917656` | Kraft press / fills |
+| `accentSoft` | `#3D3228` | Wash |
+| `accentSecondary` | `#C4A882` | Brass secondary |
+| `todayMark` | `#C4A070` | Today |
+| `danger` / `overdue` / `warning` | same clay / rose / pencil as Notebook | |
+
+### Dark option: Clothbound
+
+Charcoal cloth cover, gilt stamping. Cool graphite ground, parchment writing, kraft/brass chrome — no sage. Settings → Dark appearance → **Clothbound**.
+
+| Token | Hex | Role |
+|-------|-----|------|
+| `canvas` | `#1A1B1C` | Deep charcoal page |
+| `canvasRuled` | `#222324` | Gutter |
+| `surface` | `#141516` | Tab bar, grouped rows |
+| `surfaceInk` | `#2A2B2C` | Inputs |
+| `ink` | `#E3D4C3` | Parchment text |
+| `inkMuted` | `#A89880` | Secondary |
+| `inkFaint` | `#8A8074` | Completed / placeholders |
+| `rule` | `#3A3B3D` | Hairlines |
+| `ruleNotebook` | `#3E3F41` | Hour lines (cool gray) |
+| `accent` | `#C4A070` | Checks, selected tab, + |
+| `accentPressed` | `#917656` | Kraft press / fills |
+| `accentSoft` | `#2C2A26` | Wash |
+| `accentSecondary` | `#C4A882` | Brass secondary |
+| `todayMark` | `#C4A070` | Today |
+| `danger` / `overdue` / `warning` | same clay / rose / pencil as Notebook | |
 
 ---
 
@@ -184,14 +228,15 @@ Not a separate selectable theme in MVP. Rough map:
 | Chosen theme | **Classic Notebook** (`notebook`) |
 | Locked | 2026-08-19 |
 | Accent pair | Pastel sage `#7FAF98` + pastel sky `#8BB4C9` |
-| User theme picker | **Later** — token API now, UI later |
-| Token source of truth | This file → Swift `NotebookTokens` (+ CSS vars when web exists) |
+| User theme picker | Light locked to Notebook; Dark = Notebook, **Morocco**, or **Clothbound** |
+| Morocco | 2026-08-29 — dark option: cocoa `#1C1612`, parchment `#E3D4C3`, kraft `#917656` / brass `#C4A070` |
+| Clothbound | 2026-09-01 — dark option: charcoal `#1A1B1C`, parchment `#E3D4C3`, kraft `#917656` / brass `#C4A070` |
+| Token source of truth | This file → Swift `NotebookTokens` / `NotebookDarkTokens` / `MoroccoTokens` / `ClothboundTokens` |
 
 ---
 
 ## Next
 
-1. Keep implementing against Classic Notebook only
-2. When coding UI: introduce `ThemeTokens` protocol with single `NotebookTokens` conformer
-3. Theme picker screen = parked until after MVP daily-driver polish
-4. Optional: static mock / SwiftUI preview of Today in this palette before foundation coding
+1. Keep chrome on `Environment(\.theme)` — no raw hex in views
+2. Light theme packs (graphite / ink) still parked
+3. Optional: preview Morocco on Calendar / Focus as well as Today

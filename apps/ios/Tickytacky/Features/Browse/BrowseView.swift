@@ -16,7 +16,7 @@ enum BrowsePane: String, CaseIterable, Identifiable {
 
 struct BrowseView: View {
     @Environment(\.appDatabase) private var database
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     var embedsNavigationStack: Bool = true
     var initialPane: BrowsePane = .today
@@ -60,7 +60,7 @@ struct BrowseView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(theme.canvas.ignoresSafeArea())
-        .navigationTitle("Today")
+        .navigationTitle(pane == .today ? "Today" : "Lists")
         .toolbar {
             if pane == .lists {
                 ToolbarItem(placement: .primaryAction) {

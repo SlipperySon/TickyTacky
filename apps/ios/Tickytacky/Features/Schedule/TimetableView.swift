@@ -18,7 +18,7 @@ struct TimetableView: View {
     @State private var selectedOccurrence: ScheduleOccurrence?
     @State private var errorMessage: String?
 
-    private let theme = Theme.current
+    @Environment(\.theme) private var theme
 
     private static let dayFormatter = AppCalendar.weekdayShort
     private static let dayNumberFormatter = AppCalendar.dayOfMonth
@@ -37,16 +37,11 @@ struct TimetableView: View {
     private var root: some View {
         ZStack {
             theme.canvas.ignoresSafeArea()
-            HStack(spacing: 0) {
-                theme.canvasRuled
-                    .frame(width: 14)
-                    .ignoresSafeArea()
-                VStack(spacing: 0) {
-                    weekHeader
-                    weekStrip
-                    Divider().overlay(theme.rule)
-                    agenda
-                }
+            VStack(spacing: 0) {
+                weekHeader
+                weekStrip
+                Divider().overlay(theme.rule)
+                agenda
             }
         }
         .modifier(OptionalNavigationTitle(title: "Timetable", enabled: showsNavigationTitle))
