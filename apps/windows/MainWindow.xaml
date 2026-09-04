@@ -50,6 +50,31 @@
              Background="{StaticResource SurfaceBrush}"
              Padding="8"
              SelectionChanged="Nav_OnSelectionChanged">
+      <ListBox.ItemContainerStyle>
+        <Style TargetType="ListBoxItem">
+          <Setter Property="Padding" Value="10,8"/>
+          <Setter Property="Foreground" Value="{StaticResource InkMutedBrush}"/>
+          <Setter Property="FontWeight" Value="SemiBold"/>
+          <Setter Property="Template">
+            <Setter.Value>
+              <ControlTemplate TargetType="ListBoxItem">
+                <Border x:Name="Bd" Padding="{TemplateBinding Padding}" CornerRadius="8" Background="Transparent">
+                  <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsSelected" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{StaticResource SageSoftBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource InkBrush}"/>
+                  </Trigger>
+                  <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="Bd" Property="Background" Value="{StaticResource SageSoftBrush}"/>
+                  </Trigger>
+                </ControlTemplate.Triggers>
+              </ControlTemplate>
+            </Setter.Value>
+          </Setter>
+        </Style>
+      </ListBox.ItemContainerStyle>
       <ListBoxItem Content="Today" IsSelected="True"/>
       <ListBoxItem Content="Calendar"/>
       <ListBoxItem Content="Focus"/>

@@ -138,8 +138,10 @@ final class AuthService {
         do {
             let envelope = try await invokeSyncKey(["action": "issue"])
             if let message = envelope.error, !message.isEmpty { throw AuthError.syncKey(message) }
-            try await applySyncSession(envelope)
             lastIssuedSyncKey = envelope.key
+            if envelope.access_token != nil {
+                try await applySyncSession(envelope)
+            }
             SyncEngine.shared.syncIfPossible()
         } catch {
             lastError = error.localizedDescription
@@ -179,8 +181,8 @@ final class AuthService {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
-        let token = session?.accessToken ?? config.anonKey
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        let token = session?.accessToken
+        request.setValue("Bearer \(token ?? config.anonKey)", forHTTPHeaderField: "Authorization")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse, http.statusCode >= 400 {

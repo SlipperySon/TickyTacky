@@ -36,7 +36,9 @@ object TickytackySync {
     }
 
     fun ensureInbox(session: Session): Inbox {
-        val existing = getArray("/rest/v1/lists?is_inbox=eq.true&deleted_at=is.null&select=*", session)
+        fun loadLive(): JSONArray =
+            getArray("/rest/v1/lists?is_inbox=eq.true&deleted_at=is.null&select=*", session)
+        val existing = loadLive()
         if (existing.length() > 0) {
             return Inbox(existing.getJSONObject(0).getString("id"))
         }
@@ -49,10 +51,16 @@ object TickytackySync {
             .put("sort_order", 0)
             .put("created_at", now)
             .put("updated_at", now)
-        val created = post("/rest/v1/lists", body, session.accessToken)
-        val row = if (created.has("id")) created else created.optJSONArray("0")?.optJSONObject(0)
-            ?: JSONArray(created.toString()).getJSONObject(0)
-        return Inbox(row.getString("id"))
+        return try {
+            val created = post("/rest/v1/lists", body, session.accessToken)
+            val row = if (created.has("id")) created else created.optJSONArray("0")?.optJSONObject(0)
+                ?: JSONArray(created.toString()).getJSONObject(0)
+            Inbox(row.getString("id"))
+        } catch (err: Exception) {
+            val retry = try { loadLive() } catch (_: Exception) { JSONArray() }
+            if (retry.length() > 0) Inbox(retry.getJSONObject(0).getString("id"))
+            else throw err
+        }
     }
 
     fun fetchTasks(session: Session): List<RemoteTask> {
@@ -74,12 +82,15 @@ object TickytackySync {
     }
 
     fun addTask(session: Session, inboxId: String, title: String): RemoteTask {
+        val trimmed = title.trim()
+        require(trimmed.isNotEmpty()) { "Title cannot be empty." }
+        requireUuid(inboxId)
         val now = isoNow()
         val body = JSONObject()
             .put("id", UUID.randomUUID().toString())
             .put("user_id", session.userId)
             .put("list_id", inboxId)
-            .put("title", title.trim())
+            .put("title", trimmed)
             .put("is_completed", false)
             .put("priority", "none")
             .put("due_date", now.take(10))
@@ -98,6 +109,7 @@ object TickytackySync {
     }
 
     fun setCompleted(session: Session, task: RemoteTask): RemoteTask {
+        requireUuid(task.id)
         val now = isoNow()
         val next = !task.isCompleted
         val body = JSONObject()
@@ -106,6 +118,13 @@ object TickytackySync {
             .put("updated_at", now)
         request("PATCH", "/rest/v1/tasks?id=eq.${task.id}", body, session.accessToken)
         return task.copy(isCompleted = next)
+    }
+
+    private val uuidRegex =
+        Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+
+    private fun requireUuid(id: String) {
+        require(uuidRegex.matches(id)) { "Invalid id" }
     }
 
     private fun jwtSub(token: String): String {
@@ -136,7 +155,7 @@ object TickytackySync {
 
     private fun request(method: String, path: String, body: JSONObject?, token: String?): String {
         val connection = (URL("$url$path").openConnection() as HttpURLConnection).apply {
-            requestMethod = if (method == "PATCH") "PATCH" else method
+            applyMethod(if (method == "PATCH") "PATCH" else method)
             setRequestProperty("apikey", anonKey)
             setRequestProperty("Content-Type", "application/json")
             setRequestProperty("Prefer", "return=representation")
@@ -154,6 +173,16 @@ object TickytackySync {
             throw IllegalStateException(parseError(text).ifBlank { connection.responseMessage })
         }
         return text
+    }
+
+    private fun HttpURLConnection.applyMethod(method: String) {
+        try {
+            requestMethod = method
+        } catch (_: java.net.ProtocolException) {
+            val field = HttpURLConnection::class.java.getDeclaredField("method")
+            field.isAccessible = true
+            field.set(this, method)
+        }
     }
 
     private fun parseError(text: String): String {

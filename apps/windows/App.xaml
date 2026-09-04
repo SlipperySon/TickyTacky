@@ -12,8 +12,23 @@
     <SolidColorBrush x:Key="SageBrush" Color="#7FAF98"/>
     <SolidColorBrush x:Key="KraftBrush" Color="#C4A882"/>
     <SolidColorBrush x:Key="KraftSoftBrush" Color="#EDE3D2"/>
+    <SolidColorBrush x:Key="SageSoftBrush" Color="#E2F0E8"/>
+    <SolidColorBrush x:Key="InkFaintBrush" Color="#A39A8E"/>
     <SolidColorBrush x:Key="OverdueBrush" Color="#C47A6C"/>
     <SolidColorBrush x:Key="OnKraftBrush" Color="#2E261C"/>
     <SolidColorBrush x:Key="OnSageBrush" Color="#1F2E28"/>
+    <Style TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource SageBrush}"/>
+      <Setter Property="Foreground" Value="{StaticResource OnSageBrush}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="12,6"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style TargetType="TextBox">
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="BorderBrush" Value="{StaticResource RuleBrush}"/>
+      <Setter Property="Background" Value="{StaticResource SurfaceInkBrush}"/>
+      <Setter Property="Foreground" Value="{StaticResource InkBrush}"/>
+    </Style>
   </Application.Resources>
 </Application>

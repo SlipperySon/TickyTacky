@@ -4,6 +4,11 @@ import Network
 import Observation
 import Supabase
 
+private let syncTableNames: Set<String> = [
+    "lists", "tasks", "subtasks", "tags",
+    "schedules", "schedule_blocks", "schedule_exceptions"
+]
+
 /// Pull/push sync against Supabase. Offline local CRUD stays available without a session.
 /// Realtime subscribe is deferred — sync on foreground + manual trigger.
 @MainActor
@@ -348,6 +353,10 @@ final class SyncEngine {
         }
         guard !toPush.isEmpty else { return }
 
+        guard syncTableNames.contains(table) else {
+            throw SyncError.invalidIdentifier
+        }
+
         try await client.from(table)
             .upsert(toPush, onConflict: "id")
             .execute()
@@ -372,6 +381,9 @@ final class SyncEngine {
         id: String,
         expectedUpdatedAt: Date
     ) throws {
+        guard syncTableNames.contains(table), RecordID.isUUID(id) else {
+            throw SyncError.invalidIdentifier
+        }
         try db.execute(
             sql: "UPDATE \(table) SET synced_at = updated_at WHERE id = ? AND updated_at = ?",
             arguments: [id, expectedUpdatedAt]
@@ -388,6 +400,7 @@ final class SyncEngine {
 
         for taskId in taskIds {
             let normalizedTaskId = RecordID.normalize(taskId)
+            guard RecordID.isUUID(normalizedTaskId) else { continue }
             let links = try await database.dbQueue.read { db in
                 try TaskTagRecord
                     .filter(TaskTagRecord.Columns.taskId == taskId)
@@ -616,6 +629,9 @@ final class SyncEngine {
     }
 
     private func fetchRemoteUpdatedAt(client: SupabaseClient, table: String, id: String) async throws -> Date? {
+        guard syncTableNames.contains(table), RecordID.isUUID(id) else {
+            throw SyncError.invalidIdentifier
+        }
         struct Row: Decodable { var updated_at: Date }
         let rows: [Row] = try await client.from(table)
             .select("updated_at")
@@ -684,12 +700,8 @@ final class SyncEngine {
     }
 
     private static func countDirty(_ db: Database) throws -> Int {
-        let tables = [
-            "lists", "tasks", "subtasks", "tags",
-            "schedules", "schedule_blocks", "schedule_exceptions"
-        ]
         var count = 0
-        for table in tables {
+        for table in syncTableNames.sorted() {
             count += try Int.fetchOne(
                 db,
                 sql: """
@@ -704,10 +716,12 @@ final class SyncEngine {
 
 enum SyncError: LocalizedError {
     case missingInbox
+    case invalidIdentifier
 
     var errorDescription: String? {
         switch self {
         case .missingInbox: "Inbox list is missing."
+        case .invalidIdentifier: "Sync skipped a malformed row."
         }
     }
 }

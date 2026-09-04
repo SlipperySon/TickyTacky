@@ -56,23 +56,35 @@ final class AppDatabase: @unchecked Sendable {
 
     func seedInboxIfNeeded() throws {
         try dbQueue.write { db in
-            let inboxExists = try TaskListRecord
+            let inboxes = try TaskListRecord
                 .filter(TaskListRecord.Columns.isInbox == true && TaskListRecord.Columns.deletedAt == nil)
-                .fetchOne(db) != nil
-            guard !inboxExists else { return }
-            let now = Date()
-            let inbox = TaskListRecord(
-                id: RecordID.make(),
-                name: "Inbox",
-                color: "sage",
-                icon: nil,
-                sortOrder: 0,
-                isInbox: true,
-                createdAt: now,
-                updatedAt: now,
-                deletedAt: nil
-            )
-            try inbox.insert(db)
+                .order(TaskListRecord.Columns.createdAt.asc)
+                .fetchAll(db)
+            if inboxes.isEmpty {
+                let now = Date()
+                let inbox = TaskListRecord(
+                    id: RecordID.make(),
+                    name: "Inbox",
+                    color: "sage",
+                    icon: nil,
+                    sortOrder: 0,
+                    isInbox: true,
+                    createdAt: now,
+                    updatedAt: now,
+                    deletedAt: nil
+                )
+                try inbox.insert(db)
+                return
+            }
+            if inboxes.count > 1 {
+                let now = Date()
+                for extra in inboxes.dropFirst() {
+                    var row = extra
+                    row.isInbox = false
+                    row.updatedAt = now
+                    try row.update(db)
+                }
+            }
         }
     }
 

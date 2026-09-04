@@ -31,27 +31,41 @@ public static class TickytackySync
 
     public static async Task<Inbox> EnsureInbox(Session session)
     {
-        using var existing = JsonDocument.Parse(
-            await Get("/rest/v1/lists?is_inbox=eq.true&deleted_at=is.null&select=*", session)
-        );
-        if (existing.RootElement.GetArrayLength() > 0)
+        async Task<Inbox?> LoadLive()
         {
-            return new Inbox(existing.RootElement[0].GetProperty("id").GetString()!);
+            using var existing = JsonDocument.Parse(
+                await Get("/rest/v1/lists?is_inbox=eq.true&deleted_at=is.null&select=*", session)
+            );
+            if (existing.RootElement.GetArrayLength() > 0)
+            {
+                return new Inbox(existing.RootElement[0].GetProperty("id").GetString()!);
+            }
+            return null;
         }
 
+        if (await LoadLive() is { } live) return live;
+
         var now = DateTime.UtcNow.ToString("o");
-        var created = await Post("/rest/v1/lists", new
+        try
         {
-            id = Guid.NewGuid(),
-            user_id = session.UserId,
-            name = "Inbox",
-            is_inbox = true,
-            sort_order = 0,
-            created_at = now,
-            updated_at = now
-        }, session.AccessToken);
-        using var doc = JsonDocument.Parse(WrapArray(created));
-        return new Inbox(doc.RootElement[0].GetProperty("id").GetString()!);
+            var created = await Post("/rest/v1/lists", new
+            {
+                id = Guid.NewGuid(),
+                user_id = session.UserId,
+                name = "Inbox",
+                is_inbox = true,
+                sort_order = 0,
+                created_at = now,
+                updated_at = now
+            }, session.AccessToken);
+            using var doc = JsonDocument.Parse(WrapArray(created));
+            return new Inbox(doc.RootElement[0].GetProperty("id").GetString()!);
+        }
+        catch
+        {
+            if (await LoadLive() is { } retry) return retry;
+            throw;
+        }
     }
 
     public static async Task<IReadOnlyList<RemoteTask>> FetchTasks(Session session)
@@ -75,13 +89,16 @@ public static class TickytackySync
 
     public static async Task AddTask(Session session, string inboxId, string title)
     {
+        var trimmed = title.Trim();
+        if (string.IsNullOrEmpty(trimmed)) throw new InvalidOperationException("Title cannot be empty.");
+        RequireUuid(inboxId);
         var now = DateTime.UtcNow.ToString("o");
         await Post("/rest/v1/tasks", new
         {
             id = Guid.NewGuid(),
             user_id = session.UserId,
             list_id = inboxId,
-            title = title.Trim(),
+            title = trimmed,
             is_completed = false,
             priority = "none",
             due_date = DateTime.UtcNow.ToString("yyyy-MM-dd"),
@@ -93,6 +110,7 @@ public static class TickytackySync
 
     public static async Task SetCompleted(Session session, RemoteTask task)
     {
+        RequireUuid(task.Id);
         var now = DateTime.UtcNow.ToString("o");
         var next = !task.IsCompleted;
         await Send(HttpMethod.Patch, $"/rest/v1/tasks?id=eq.{task.Id}", new
@@ -101,6 +119,11 @@ public static class TickytackySync
             completed_at = next ? now : (string?)null,
             updated_at = now
         }, session.AccessToken);
+    }
+
+    private static void RequireUuid(string id)
+    {
+        if (!Guid.TryParseExact(id, "D", out _)) throw new InvalidOperationException("Invalid id");
     }
 
     private static string WrapArray(string json) =>

@@ -48,16 +48,10 @@ struct TaskRow: View {
     private var dueLabel: String? {
         guard let due = task.dueDate else { return nil }
         var parts: [String] = []
-        let today = DueDate.today()
-        if due < today {
+        if due < DueDate.today() {
             parts.append("Overdue")
         }
-        let formatter = DateFormatter()
-        formatter.locale = AppCalendar.locale
-        formatter.calendar = AppCalendar.gregorian
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        parts.append(formatter.string(from: due))
+        parts.append(AppCalendar.dayMonth.string(from: due))
         if task.hasDueTime, let hour = task.dueHour, let minute = task.dueMinute {
             var comps = DateComponents()
             comps.hour = hour

@@ -41,8 +41,8 @@ struct CenterPlusTabBar: View {
             }
             .frame(height: iconBandHeight + 3 + labelHeight)
             .padding(.horizontal, 8)
-            .padding(.top, 20)
-            .padding(.bottom, 0)
+            .padding(.top, 8)
+            .padding(.bottom, 8)
         }
         .frame(maxWidth: .infinity)
         .background(theme.surface)

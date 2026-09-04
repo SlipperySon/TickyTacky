@@ -51,18 +51,19 @@ function todayMarkup() {
     return `<div class="placeholder">Sign in under Settings to load tasks from Supabase.</div>`;
   }
   const rows = tasks.length
-    ? tasks
-        .map(
-          (task) => `
-      <button type="button" class="row as-button" data-toggle="${task.id}">
+    ? `<div class="task-list">${tasks
+        .map((task) => {
+          const overdue = isOverdue(task);
+          return `
+      <button type="button" class="row as-button" data-toggle="${escapeHtml(task.id)}">
         <span class="check ${task.is_completed ? "done" : ""}" aria-hidden="true"></span>
         <div>
-          <div>${escapeHtml(task.title)}</div>
-          <div class="meta">${task.due_date || "No date"} · ${task.priority || "none"}</div>
+          <div class="title ${task.is_completed ? "done" : ""}">${escapeHtml(task.title)}</div>
+          <div class="meta ${overdue ? "overdue" : ""}">${escapeHtml(overdue ? "Overdue · " : "")}${escapeHtml(task.due_date || "No date")} · ${escapeHtml(task.priority || "none")}</div>
         </div>
-      </button>`
-        )
-        .join("")
+      </button>`;
+        })
+        .join("")}</div>`
     : `<div class="placeholder">No tasks yet. Add one below.</div>`;
   return `
     <form class="add-row" id="add-form">
@@ -92,12 +93,18 @@ function settingsMarkup() {
   `;
 }
 
+function isOverdue(task) {
+  if (task.is_completed || !task.due_date) return false;
+  return String(task.due_date) < new Date().toISOString().slice(0, 10);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function bodyFor(key) {

@@ -31,8 +31,11 @@ body {
 
 #app {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 .platform-stripe {
@@ -81,6 +84,8 @@ nav.tabs {
   padding: 8px 16px;
   border-bottom: 1px solid var(--rule);
   background: var(--surface);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 nav.tabs button {
@@ -93,6 +98,7 @@ nav.tabs button {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 nav.tabs button[aria-current="page"] {
@@ -104,6 +110,8 @@ main {
   flex: 1;
   padding: 20px 20px 32px;
   max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 h1 {
@@ -128,6 +136,12 @@ h1 {
   border-bottom: 1px dashed var(--rule-notebook);
 }
 
+.task-list {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+}
+
 .row {
   display: flex;
   align-items: flex-start;
@@ -137,12 +151,13 @@ h1 {
   border-bottom: 1px solid var(--rule);
 }
 
-.row:first-of-type {
-  border-radius: 8px 8px 0 0;
+.task-list .row:last-child {
+  border-bottom: 0;
 }
 
-.row:last-of-type {
-  border-radius: 0 0 8px 8px;
+.title.done {
+  color: var(--ink-faint);
+  text-decoration: line-through;
 }
 
 .check {
@@ -218,6 +233,12 @@ h1 {
 
 .add-row {
   flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.add-row input {
+  flex: 1;
+  min-width: 0;
 }
 
 .auth-form label {
@@ -242,6 +263,10 @@ input {
   gap: 8px;
 }
 
+.add-row button {
+  flex-shrink: 0;
+}
+
 button.primary,
 .auth-actions button,
 .add-row button {
@@ -258,4 +283,21 @@ button.primary,
 
 button:disabled {
   opacity: 0.55;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--sky);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  nav.tabs button:hover {
+    color: var(--ink);
+    background: var(--sky-soft);
+  }
+
+  .row.as-button:hover {
+    background: var(--accent-soft);
+  }
 }

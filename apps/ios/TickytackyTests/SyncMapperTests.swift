@@ -232,4 +232,12 @@ final class SyncMapperTests: XCTestCase {
         let local = SyncMapper.toLocal(list: remote)
         XCTAssertEqual(local.id, upper.lowercased())
     }
+
+    func testRecordIDRejectsNonUUID() {
+        XCTAssertTrue(RecordID.isUUID(UUID().uuidString))
+        XCTAssertTrue(RecordID.isUUID("A1B2C3D4-E5F6-7890-ABCD-EF1234567890"))
+        XCTAssertFalse(RecordID.isUUID("tasks;drop table lists"))
+        XCTAssertFalse(RecordID.isUUID(""))
+        XCTAssertFalse(RecordID.isUUID("not-a-uuid"))
+    }
 }

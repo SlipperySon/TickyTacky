@@ -10,4 +10,8 @@ enum RecordID {
     static func normalize(_ id: String) -> String {
         id.lowercased()
     }
+
+    static func isUUID(_ id: String) -> Bool {
+        UUID(uuidString: id) != nil
+    }
 }

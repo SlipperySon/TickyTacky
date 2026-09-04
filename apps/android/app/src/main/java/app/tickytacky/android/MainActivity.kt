@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +54,7 @@ private val Surface = Color(0xFFFBF6EC)
 private val SurfaceInk = Color(0xFFFFFCF6)
 private val Ink = Color(0xFF2A2622)
 private val InkMuted = Color(0xFF7A7268)
+private val InkFaint = Color(0xFFA39A8E)
 private val Rule = Color(0xFFD4CBBA)
 private val Sage = Color(0xFF7FAF98)
 private val SageSoft = Color(0xFFE2F0E8)
@@ -100,6 +105,8 @@ fun TickytackyAndroidApp() {
         modifier = Modifier
             .fillMaxSize()
             .background(Canvas)
+            .systemBarsPadding()
+            .imePadding()
     ) {
         Box(
             modifier = Modifier
@@ -363,18 +370,32 @@ private fun TaskRow(title: String, meta: String, done: Boolean, onClick: () -> U
             .fillMaxWidth()
             .background(SurfaceInk)
             .clickable(onClick = onClick)
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top
     ) {
         Box(
             modifier = Modifier
+                .padding(top = 2.dp)
                 .size(18.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(if (done) Sage else Sage.copy(alpha = 0.15f))
+                .background(if (done) Sage else Color.Transparent)
+                .border(2.dp, Sage, RoundedCornerShape(4.dp))
         )
         Column {
-            Text(title, color = Ink, fontWeight = FontWeight.Medium)
+            Text(
+                title,
+                color = if (done) InkFaint else Ink,
+                fontWeight = FontWeight.Medium,
+                textDecoration = if (done) TextDecoration.LineThrough else TextDecoration.None
+            )
             Text(meta, color = InkMuted, fontSize = 13.sp)
         }
     }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(Rule)
+    )
 }

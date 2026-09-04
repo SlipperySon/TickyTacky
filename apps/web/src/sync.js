@@ -69,12 +69,22 @@ export function userId(session) {
   return session?.user?.id || userIdFromToken(session?.access_token) || null;
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function requireUuid(id, label = "id") {
+  if (!UUID_RE.test(String(id ?? ""))) throw new Error(`Invalid ${label}`);
+  return String(id);
+}
+
 function userIdFromToken(accessToken) {
   if (!accessToken) return null;
   try {
-    const payload = JSON.parse(
-      atob(accessToken.split(".")[1].replaceAll("-", "+").replaceAll("_", "/"))
-    );
+    const part = accessToken.split(".")[1];
+    if (!part) return null;
+    const b64 = part.replaceAll("-", "+").replaceAll("_", "/");
+    const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded));
     return payload.sub || null;
   } catch {
     return null;
@@ -98,24 +108,32 @@ async function rest(session, path, { method = "GET", body, query = "" } = {}) {
 
 export async function ensureInbox(session) {
   const uid = userId(session);
-  const existing = await rest(session, "lists", {
-    query: "?is_inbox=eq.true&deleted_at=is.null&select=*",
-  });
+  const loadLive = () =>
+    rest(session, "lists", {
+      query: "?is_inbox=eq.true&deleted_at=is.null&select=*",
+    });
+  const existing = await loadLive();
   if (existing.length) return existing[0];
   const now = new Date().toISOString();
-  const rows = await rest(session, "lists", {
-    method: "POST",
-    body: {
-      id: crypto.randomUUID(),
-      user_id: uid,
-      name: "Inbox",
-      is_inbox: true,
-      sort_order: 0,
-      created_at: now,
-      updated_at: now,
-    },
-  });
-  return rows[0];
+  try {
+    const rows = await rest(session, "lists", {
+      method: "POST",
+      body: {
+        id: crypto.randomUUID(),
+        user_id: uid,
+        name: "Inbox",
+        is_inbox: true,
+        sort_order: 0,
+        created_at: now,
+        updated_at: now,
+      },
+    });
+    return rows[0];
+  } catch (err) {
+    const retry = await loadLive();
+    if (retry.length) return retry[0];
+    throw err;
+  }
 }
 
 export async function fetchTasks(session) {
@@ -125,6 +143,8 @@ export async function fetchTasks(session) {
 }
 
 export async function addTask(session, inboxId, title) {
+  const trimmed = String(title ?? "").trim();
+  if (!trimmed) throw new Error("Title cannot be empty.");
   const uid = userId(session);
   const now = new Date().toISOString();
   const today = now.slice(0, 10);
@@ -133,8 +153,8 @@ export async function addTask(session, inboxId, title) {
     body: {
       id: crypto.randomUUID(),
       user_id: uid,
-      list_id: inboxId,
-      title: title.trim(),
+      list_id: requireUuid(inboxId, "list"),
+      title: trimmed,
       is_completed: false,
       priority: "none",
       due_date: today,
@@ -151,7 +171,7 @@ export async function setCompleted(session, task) {
   const next = !task.is_completed;
   const rows = await rest(session, "tasks", {
     method: "PATCH",
-    query: `?id=eq.${task.id}`,
+    query: `?id=eq.${requireUuid(task.id)}`,
     body: {
       is_completed: next,
       completed_at: next ? now : null,

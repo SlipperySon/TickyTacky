@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Tickytacky.Windows;
@@ -240,20 +241,49 @@ public partial class MainWindow : Window
 
     private Border TaskRow(string title, string meta, bool done)
     {
-        var stack = new StackPanel();
-        stack.Children.Add(new TextBlock { Text = title, FontWeight = FontWeights.Medium });
-        stack.Children.Add(new TextBlock
+        var check = new Border
+        {
+            Width = 18,
+            Height = 18,
+            CornerRadius = new CornerRadius(4),
+            BorderBrush = (Brush)FindResource("SageBrush"),
+            BorderThickness = new Thickness(2),
+            Background = done ? (Brush)FindResource("SageBrush") : Brushes.Transparent,
+            Margin = new Thickness(0, 2, 0, 0),
+            VerticalAlignment = VerticalAlignment.Top
+        };
+        var titleBlock = new TextBlock
+        {
+            Text = title,
+            FontWeight = FontWeights.Medium,
+            Foreground = done ? (Brush)FindResource("InkFaintBrush") : (Brush)FindResource("InkBrush"),
+            TextWrapping = TextWrapping.Wrap
+        };
+        if (done)
+        {
+            titleBlock.TextDecorations = TextDecorations.Strikethrough;
+        }
+        var text = new StackPanel();
+        text.Children.Add(titleBlock);
+        text.Children.Add(new TextBlock
         {
             Text = meta,
             Foreground = (Brush)FindResource("InkMutedBrush"),
             FontSize = 13
         });
+        var row = new DockPanel();
+        DockPanel.SetDock(check, Dock.Left);
+        row.Children.Add(check);
+        row.Children.Add(text);
+        check.Margin = new Thickness(0, 2, 12, 0);
         return new Border
         {
-            Background = done ? (Brush)FindResource("SageBrush") : (Brush)FindResource("SurfaceInkBrush"),
-            Padding = new Thickness(12),
-            Cursor = System.Windows.Input.Cursors.Hand,
-            Child = stack
+            Background = (Brush)FindResource("SurfaceInkBrush"),
+            BorderBrush = (Brush)FindResource("RuleBrush"),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Padding = new Thickness(12, 10, 12, 10),
+            Cursor = Cursors.Hand,
+            Child = row
         };
     }
 }
